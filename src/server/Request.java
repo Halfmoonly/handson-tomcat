@@ -16,6 +16,8 @@ public class Request {
         int i;
         byte[] buffer = new byte[2048];
         try {
+            //Reads some number of bytes from the input stream and stores them into the buffer array
+            //input -> buffer
             i = input.read(buffer);
         } catch (IOException e) {
             e.printStackTrace();
