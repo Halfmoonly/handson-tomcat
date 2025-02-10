@@ -35,3 +35,5 @@ build/
 
 ./log-file/
 ./service-logs
+
+./out
