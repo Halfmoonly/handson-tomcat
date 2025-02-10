@@ -279,7 +279,7 @@ Hello World!
 
 浏览器输出：
 
-![img.png](img.png)
+![img_2.png](img_2.png)
 
 控制台输出：
 ```shell
