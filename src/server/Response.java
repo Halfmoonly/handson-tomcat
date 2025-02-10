@@ -27,6 +27,8 @@ public class Response {
                 fis = new FileInputStream(file);
                 int ch = fis.read(bytes, 0, BUFFER_SIZE);
                 while (ch != -1) {
+                    //Writes len bytes from the specified byte array starting at offset off to this output stream
+                    // output <- bytes
                     output.write(bytes, 0, ch);
                     ch = fis.read(bytes, 0, BUFFER_SIZE);
                 }
