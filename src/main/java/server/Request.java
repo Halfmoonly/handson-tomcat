@@ -1,4 +1,4 @@
-package src.server;
+package server;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,8 +16,6 @@ public class Request {
         int i;
         byte[] buffer = new byte[2048];
         try {
-            //Reads some number of bytes from the input stream and stores them into the buffer array
-            //input -> buffer
             i = input.read(buffer);
         } catch (IOException e) {
             e.printStackTrace();
@@ -44,6 +42,4 @@ public class Request {
     public String getUri() {
         return uri;
     }
-
-
 }

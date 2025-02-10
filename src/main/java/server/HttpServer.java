@@ -1,6 +1,4 @@
-package src.server;
-
-import com.sun.security.ntlm.Server;
+package server;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,7 +27,6 @@ public class HttpServer {
         }
 
         while (true) {
-
             Socket socket = null;
             InputStream input = null;
             OutputStream output = null;
@@ -45,8 +42,15 @@ public class HttpServer {
                 // create Response object
                 Response response = new Response(output);
                 response.setRequest(request);
-                response.sendStaticResource();
 
+                if (request.getUri().startsWith("/servlet/")) {
+                    ServletProcessor processor = new ServletProcessor();
+                    processor.process(request, response);
+                }
+                else {
+                    StaticResourceProcessor processor = new StaticResourceProcessor();
+                    processor.process(request, response);
+                }
                 // close the socket
                 socket.close();
             } catch (Exception e) {
