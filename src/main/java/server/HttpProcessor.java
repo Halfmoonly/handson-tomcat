@@ -14,6 +14,7 @@ public class HttpProcessor implements Runnable{
 
     @Override
     public void run() {
+        // 注意Processor线程也要无限循环，否则线程执行结束就变成一次性的了
         while (true) {
             // Wait for the next socket to be assigned
             Socket socket = await();

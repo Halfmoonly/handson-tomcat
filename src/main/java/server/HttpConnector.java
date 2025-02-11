@@ -30,7 +30,7 @@ public class HttpConnector implements Runnable {
             processors.push(initprocessor);
         }
         curProcessors = minProcessors;
-
+        // Connector线程需要写成无限循环，持续监听浏览器请求
         while (true) {
             Socket socket = null;
             try {
