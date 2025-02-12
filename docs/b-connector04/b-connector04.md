@@ -5,6 +5,8 @@
 
 接下来我们为请求和响应，实现Servlet规范定义的接口，并逐步开始解析工作。
 
+- 本节只对 Request 请求相关的代码进行实现
+
 ## 定义 HttpRequest
 首先，定义 HttpRequest 与 HttpResponse，分别实现 HttpServletRequest 与 HttpServletResponse 接口。
 
