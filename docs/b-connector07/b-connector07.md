@@ -33,7 +33,7 @@ parameter docid : TS0001
 <h1 align="center">Test GET 你好</h1>
 ```
 
-1、手工写一个请求串，或者使用HTTP插件模拟如下POST请求，注意只支持x-www-form-urlencoded，不支持json
+测试POST请求体解析，手工写一个请求串，或者使用HTTP插件模拟如下POST请求，注意只支持x-www-form-urlencoded，不支持json
 ```
 POST /servlet/test.TestServlet HTTP/1.1
 Host: localhost:8080
@@ -96,4 +96,17 @@ HttpRequest#parseParameters()中执行了is.close();
         else
             return (null);
     }
+```
+
+致此，POST请求体解析大功告成
+```shell
+requestFacade = server.HttpRequestFacade@2e006341
+Enter doPost()
+parameter body name : Professional Ajax
+parameter body publisher : Wiley
+<!DOCTYPE html> 
+<html>
+<head><meta charset="utf-8"><title>Test</title></head>
+<body bgcolor="#f0f0f0">
+<h1 align="center">Test POST 你好</h1>
 ```
