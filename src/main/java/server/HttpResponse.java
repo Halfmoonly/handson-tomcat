@@ -17,14 +17,14 @@ public class HttpResponse implements HttpServletResponse {
     HttpRequest request;
     OutputStream output;
     PrintWriter writer;
+
     String contentType = null;
     long contentLength = -1;
     String charset = null;
-    String characterEncoding = "utf-8";
+    String characterEncoding = null;
     String protocol = "HTTP/1.1";
-    //headers是一个保存头信息的map
+
     Map<String, String> headers = new ConcurrentHashMap<>();
-    //默认返回OK
     String message = getStatusMessage(HttpServletResponse.SC_OK);
     int status = HttpServletResponse.SC_OK;
 
@@ -36,7 +36,6 @@ public class HttpResponse implements HttpServletResponse {
         this.request = request;
     }
 
-    //状态码以及消息文本，没有考虑国际化
     protected String getStatusMessage(int status) {
         switch (status) {
             case SC_OK:
@@ -72,7 +71,6 @@ public class HttpResponse implements HttpServletResponse {
 
     public void sendHeaders() throws IOException {
         PrintWriter outputWriter = getWriter();
-        //下面这一端是输出状态行
         outputWriter.print(this.getProtocol());
         outputWriter.print(" ");
         outputWriter.print(status);
@@ -87,7 +85,6 @@ public class HttpResponse implements HttpServletResponse {
         if (getContentLength() >= 0) {
             outputWriter.print("Content-Length: " + getContentLength() + "\r\n");
         }
-        //输出头信息
         Iterator<String> names = headers.keySet().iterator();
         while (names.hasNext()) {
             String name = names.next();
@@ -97,36 +94,20 @@ public class HttpResponse implements HttpServletResponse {
             outputWriter.print(value);
             outputWriter.print("\r\n");
         }
-        //最后输出空行
         outputWriter.print("\r\n");
         outputWriter.flush();
     }
 
-    @Override
-    public PrintWriter getWriter() throws IOException {
-        writer = new PrintWriter(new OutputStreamWriter(output, getCharacterEncoding()), true);
-        return writer;
+    private long getContentLength() {
+        return this.contentLength;
     }
 
-    @Override
-    public void addHeader(String name, String value) {
-        headers.put(name, value);
-        if (name.toLowerCase() == DefaultHeaders.CONTENT_LENGTH_NAME) {
-            setContentLength(Integer.parseInt(value));
-        }
-        if (name.toLowerCase() == DefaultHeaders.CONTENT_TYPE_NAME) {
-            setContentType(value);
-        }
+    private String getProtocol() {
+        return this.protocol;
     }
 
-    public void setHeader(String name, String value) {
-        headers.put(name, value);
-        if (name.toLowerCase() == DefaultHeaders.CONTENT_LENGTH_NAME) {
-            setContentLength(Integer.parseInt(value));
-        }
-        if (name.toLowerCase() == DefaultHeaders.CONTENT_TYPE_NAME) {
-            setContentType(value);
-        }
+    public OutputStream getOutput() {
+        return this.output;
     }
 
     @Override
@@ -145,7 +126,7 @@ public class HttpResponse implements HttpServletResponse {
 
     @Override
     public String getContentType() {
-        return null;
+        return this.contentType;
     }
 
     @Override
@@ -158,6 +139,11 @@ public class HttpResponse implements HttpServletResponse {
         return null;
     }
 
+    @Override
+    public PrintWriter getWriter() throws IOException {
+        writer = new PrintWriter(new OutputStreamWriter(output, getCharacterEncoding()), true);
+        return writer;
+    }
 
     @Override
     public boolean isCommitted() {
@@ -178,18 +164,22 @@ public class HttpResponse implements HttpServletResponse {
 
     @Override
     public void setCharacterEncoding(String arg0) {
+        this.characterEncoding = arg0;
     }
 
     @Override
-    public void setContentLength(int arg0) {
+    public void setContentLength(int length) {
+        this.contentLength = length;
     }
 
     @Override
-    public void setContentLengthLong(long arg0) {
+    public void setContentLengthLong(long length) {
+        this.contentLength = length;
     }
 
     @Override
     public void setContentType(String arg0) {
+        this.contentType = arg0;
     }
 
     @Override
@@ -205,12 +195,23 @@ public class HttpResponse implements HttpServletResponse {
     }
 
     @Override
+    public void addHeader(String name, String value) {
+        headers.put(name, value);
+        if (name.toLowerCase() == DefaultHeaders.CONTENT_LENGTH_NAME) {
+            setContentLength(Integer.parseInt(value));
+        }
+        if (name.toLowerCase() == DefaultHeaders.CONTENT_TYPE_NAME) {
+            setContentType(value);
+        }
+    }
+
+    @Override
     public void addIntHeader(String arg0, int arg1) {
     }
 
     @Override
-    public boolean containsHeader(String arg0) {
-        return false;
+    public boolean containsHeader(String name) {
+        return (headers.get(name) != null);
     }
 
     @Override
@@ -234,13 +235,13 @@ public class HttpResponse implements HttpServletResponse {
     }
 
     @Override
-    public String getHeader(String arg0) {
-        return null;
+    public String getHeader(String name) {
+        return headers.get(name);
     }
 
     @Override
     public Collection<String> getHeaderNames() {
-        return null;
+        return headers.keySet();
     }
 
     @Override
@@ -250,7 +251,7 @@ public class HttpResponse implements HttpServletResponse {
 
     @Override
     public int getStatus() {
-        return 0;
+        return this.status;
     }
 
     @Override
@@ -270,69 +271,27 @@ public class HttpResponse implements HttpServletResponse {
     }
 
     @Override
+    public void setHeader(String name, String value) {
+        headers.put(name, value);
+        if (name.toLowerCase() == DefaultHeaders.CONTENT_LENGTH_NAME) {
+            setContentLength(Integer.parseInt(value));
+        }
+        if (name.toLowerCase() == DefaultHeaders.CONTENT_TYPE_NAME) {
+            setContentType(value);
+        }
+    }
+
+    @Override
     public void setIntHeader(String arg0, int arg1) {
     }
 
     @Override
-    public void setStatus(int arg0) {
+    public void setStatus(int status) {
+        this.status = status;
+        this.message = this.getStatusMessage(status);
     }
 
     @Override
     public void setStatus(int arg0, String arg1) {
-    }
-    public HttpRequest getRequest() {
-        return request;
-    }
-
-    public OutputStream getOutput() {
-        return output;
-    }
-
-    public void setOutput(OutputStream output) {
-        this.output = output;
-    }
-
-    public void setWriter(PrintWriter writer) {
-        this.writer = writer;
-    }
-
-    public long getContentLength() {
-        return contentLength;
-    }
-
-    public void setContentLength(long contentLength) {
-        this.contentLength = contentLength;
-    }
-
-    public String getCharset() {
-        return charset;
-    }
-
-    public void setCharset(String charset) {
-        this.charset = charset;
-    }
-
-    public String getProtocol() {
-        return protocol;
-    }
-
-    public void setProtocol(String protocol) {
-        this.protocol = protocol;
-    }
-
-    public Map<String, String> getHeaders() {
-        return headers;
-    }
-
-    public void setHeaders(Map<String, String> headers) {
-        this.headers = headers;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
     }
 }

@@ -49,7 +49,7 @@ public class HttpProcessor implements Runnable{
             HttpRequest request = new HttpRequest(input);
             request.parse(socket);
 
-// create Response object
+            // create Response object
             HttpResponse response = new HttpResponse(output);
             response.setRequest(request);
 //               response.sendStaticResource();

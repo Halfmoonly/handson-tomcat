@@ -1,11 +1,5 @@
 package server;
 
-/**
- * HTTP请求规范中的第一行的抽象
- *
- * 格式是 method uri protocol，
- * eg GET /hello.txt HTTP/1.1
- */
 public class HttpRequestLine {
     public static final int INITIAL_METHOD_SIZE = 8;
     public static final int INITIAL_URI_SIZE = 128;

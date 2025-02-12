@@ -20,7 +20,7 @@ public class HttpRequest implements HttpServletRequest {
     int port;
     protected HashMap<String, String> headers = new HashMap<>();
     protected Map<String, String> parameters = new ConcurrentHashMap<>();
-    HttpRequestLine requestLine = new HttpRequestLine();//HTTP请求规范中的第一行
+    HttpRequestLine requestLine = new HttpRequestLine();
 
     public HttpRequest(InputStream input) {
         this.input = input;
@@ -316,7 +316,7 @@ public class HttpRequest implements HttpServletRequest {
 
     @Override
     public String getMethod() {
-        return null;
+        return new String(this.requestLine.method, 0, this.requestLine.methodEnd);
     }
 
     @Override
