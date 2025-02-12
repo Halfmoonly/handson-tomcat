@@ -21,6 +21,7 @@ public class HttpRequest implements HttpServletRequest {
     int port;
     private boolean parsed = false;
     protected HashMap<String, String> headers = new HashMap<>();
+    //既存储GET路径参数，也存储POST请求体参数
     protected Map<String, String[]> parameters = new ConcurrentHashMap<>();
     HttpRequestLine requestLine = new HttpRequestLine();
 
