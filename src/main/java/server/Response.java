@@ -9,7 +9,7 @@ import java.io.PrintWriter;
 import java.util.Locale;
 
 public class Response implements ServletResponse{
-    Request request;
+    HttpRequest request;
     OutputStream output;
     PrintWriter writer;
 
@@ -23,7 +23,7 @@ public class Response implements ServletResponse{
         this.output = output;
     }
 
-    public void setRequest(Request request) {
+    public void setRequest(HttpRequest request) {
         this.request = request;
     }
 

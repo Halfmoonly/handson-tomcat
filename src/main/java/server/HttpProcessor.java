@@ -14,7 +14,6 @@ public class HttpProcessor implements Runnable{
 
     @Override
     public void run() {
-        // 注意Processor线程也要无限循环，否则线程执行结束就变成一次性的了
         while (true) {
             // Wait for the next socket to be assigned
             Socket socket = await();
@@ -35,10 +34,8 @@ public class HttpProcessor implements Runnable{
     }
 
     public void process(Socket socket) {
-        System.out.println("HttpProcessor正在处理...");
         try {
-//            Thread.sleep(3000);
-            Thread.sleep(100000);
+            Thread.sleep(3000);
         } catch (InterruptedException e1) {
             e1.printStackTrace();
         }
@@ -49,8 +46,8 @@ public class HttpProcessor implements Runnable{
             output = socket.getOutputStream();
 
             // create Request object and parse
-            Request request = new Request(input);
-            request.parse();
+            HttpRequest request = new HttpRequest(input);
+            request.parse(socket);
 
             // create Response object
             Response response = new Response(output);

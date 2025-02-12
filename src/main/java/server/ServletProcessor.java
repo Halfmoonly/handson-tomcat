@@ -19,7 +19,7 @@ public class ServletProcessor {
             "Date: ${ZonedDateTime}\r\n"+
             "\r\n";
 
-    public void process(Request request, Response response) {
+    public void process(HttpRequest request, Response response) {
         String uri = request.getUri();
         String servletName = uri.substring(uri.lastIndexOf("/") + 1);
         URLClassLoader loader = null;

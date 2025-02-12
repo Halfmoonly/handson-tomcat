@@ -25,7 +25,7 @@ public class StaticResourceProcessor {
             "Date: ${ZonedDateTime}\r\n"+
             "\r\n";
 
-    public void process(Request request, Response response) throws IOException {
+    public void process(HttpRequest request, Response response) throws IOException {
         byte[] bytes = new byte[BUFFER_SIZE];
         FileInputStream fis = null;
         OutputStream output = null;
