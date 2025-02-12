@@ -9,7 +9,6 @@
 ## HttpResponse适配Servlet规范
 我们常用的状态码一般为 200、401、404、500、503、504 等，我们在 HttpResponse 里用 switch 条件语句先关联常用的状态码与状态信息。
 ```java
-package server;
 public class HttpResponse implements HttpServletResponse {
   protected String getStatusMessage(int status) {
     switch (status) {
