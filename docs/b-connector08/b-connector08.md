@@ -442,7 +442,31 @@ public class HttpConnector implements Runnable {
 ```
 代码里注释为“handle session”的代码就是我们添加的，判断是否存在 SessionId，不存在则调用 getSession 方法，这个方法内会判断有没有 Session，如果没有就由服务器创建并保存在sessions的Map中。
 
-同时，如果请求中带有 jsessionid，我们会用这个 jsessionid 从 HttpConnector 类的全局 Map 里查找相应的 Session。
+同时，如果请求中带有 jsessionid，我们会用这个 jsessionid 从 HttpConnector 类的全局 Map 里查找相应的 Session。见如下getSession实现
+
+```java
+    @Override
+    public HttpSession getSession(boolean create) {
+        if (sessionFacade != null)
+            return sessionFacade;
+        if (sessionid != null) {
+            session = HttpConnector.sessions.get(sessionid);
+            if (session != null) {
+                sessionFacade = new SessionFacade(session);
+                return sessionFacade;
+            } else {
+                session = HttpConnector.createSession();
+                sessionFacade = new SessionFacade(session);
+                return sessionFacade;
+            }
+        } else {
+            session = HttpConnector.createSession();
+            sessionFacade = new SessionFacade(session);
+            sessionid = session.getId();
+            return sessionFacade;
+        }
+    }
+```
 
 但有个问题是 Request 请求每次都是新创建的，那么 Session 一定是空的，所以即使请求携带了sessionId，全局 Map里面也没有相应的session, 因此在 getSession 方法内我们会根据请求的sessionId进一步判断在 全局 Map 中是否存在 session，如果没有则服务器自己生成一份<sessionId, session>, 而不使用请求携带的sessionId
 
