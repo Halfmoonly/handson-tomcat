@@ -1,5 +1,5 @@
 # handson-tomcat
-致敬传奇，手写框架之Tomcat
+致敬传奇，手写框架之Tomcat，帮作者点点⭐⭐攻克Web系统底层原理，领悟服务器设计哲学，带你卷向更高处
 
 ![HalfmoonlyCat.png](HalfmoonlyCat.png)
 
