@@ -47,22 +47,44 @@ public class HttpRequest implements HttpServletRequest {
 
     }
 
+    //    private void parseRequestLine() {
+//        int question = requestLine.indexOf("?");
+//        if (question >= 0) {
+//            queryString = new String(requestLine.uri, question + 1, requestLine.uriEnd - question - 1);
+//            uri = new String(requestLine.uri, 0, question);
+//            int semicolon = uri.indexOf(DefaultHeaders.JSESSIONID_NAME);
+//            if (semicolon >= 0) {
+//                sessionid = uri.substring(semicolon+DefaultHeaders.JSESSIONID_NAME.length());
+//                uri = uri.substring(0, semicolon);
+//            }
+//        } else {
+//            queryString = null;
+//            uri = new String(requestLine.uri, 0, requestLine.uriEnd);
+//            int semicolon = uri.indexOf(DefaultHeaders.JSESSIONID_NAME);
+//            if (semicolon >= 0) {
+//                sessionid = uri.substring(semicolon+DefaultHeaders.JSESSIONID_NAME.length());
+//                uri = uri.substring(0, semicolon);
+//            }
+//        }
+//    }
     private void parseRequestLine() {
         int question = requestLine.indexOf("?");
         if (question >= 0) {
             queryString = new String(requestLine.uri, question + 1, requestLine.uriEnd - question - 1);
             uri = new String(requestLine.uri, 0, question);
-            int semicolon = uri.indexOf(DefaultHeaders.JSESSIONID_NAME);
+            String tmp = ";" + DefaultHeaders.JSESSIONID_NAME + "=";
+            int semicolon = uri.indexOf(tmp);
             if (semicolon >= 0) {
-                sessionid = uri.substring(semicolon+DefaultHeaders.JSESSIONID_NAME.length());
+                sessionid = uri.substring(semicolon + tmp.length());
                 uri = uri.substring(0, semicolon);
             }
         } else {
             queryString = null;
             uri = new String(requestLine.uri, 0, requestLine.uriEnd);
-            int semicolon = uri.indexOf(DefaultHeaders.JSESSIONID_NAME);
+            String tmp = ";" + DefaultHeaders.JSESSIONID_NAME + "=";
+            int semicolon = uri.indexOf(tmp);
             if (semicolon >= 0) {
-                sessionid = uri.substring(semicolon+DefaultHeaders.JSESSIONID_NAME.length());
+                sessionid = uri.substring(semicolon + tmp.length());
                 uri = uri.substring(0, semicolon);
             }
         }
@@ -84,8 +106,9 @@ public class HttpRequest implements HttpServletRequest {
                     throw new ServletException("httpProcessor.parseHeaders.colon");
                 }
             }
-            String name = new String(header.name,0,header.nameEnd);
+            String name = new String(header.name, 0, header.nameEnd);
             String value = new String(header.value, 0, header.valueEnd);
+            name = name.toLowerCase();
             // Set the corresponding request headers
             if (name.equals(DefaultHeaders.ACCEPT_LANGUAGE_NAME)) {
                 headers.put(name, value);
@@ -108,41 +131,35 @@ public class HttpRequest implements HttpServletRequest {
                         this.sessionid = cookies[i].getValue();
                     }
                 }
-            }
-            else {
+            } else {
                 headers.put(name, value);
             }
         }
     }
 
-    public  Cookie[] parseCookieHeader(String header) {
-        if ((header == null) || (header.length() < 1) )
-            return (new Cookie[0]);
+    public Cookie[] parseCookieHeader(String header) {
+        if ((header == null) || (header.length() < 1)) return (new Cookie[0]);
         ArrayList<Cookie> cookieal = new ArrayList<>();
         while (header.length() > 0) {
             int semicolon = header.indexOf(';');
-            if (semicolon < 0)
-                semicolon = header.length();
-            if (semicolon == 0)
-                break;
+            if (semicolon < 0) semicolon = header.length();
+            if (semicolon == 0) break;
 
             String token = header.substring(0, semicolon);
-            if (semicolon < header.length())
-                header = header.substring(semicolon + 1);
-            else
-                header = "";
+            if (semicolon < header.length()) header = header.substring(semicolon + 1);
+            else header = "";
 
             try {
                 int equals = token.indexOf('=');
                 if (equals > 0) {
                     String name = token.substring(0, equals).trim();
-                    String value = token.substring(equals+1).trim();
+                    String value = token.substring(equals + 1).trim();
                     cookieal.add(new Cookie(name, value));
                 }
             } catch (Throwable e) {
             }
         }
-        return ((Cookie[]) cookieal.toArray (new Cookie [cookieal.size()]));
+        return ((Cookie[]) cookieal.toArray(new Cookie[cookieal.size()]));
     }
 
     protected void parseParameters() {
@@ -152,28 +169,26 @@ public class HttpRequest implements HttpServletRequest {
             encoding = "ISO-8859-1";
         }
         String qString = getQueryString();
-        System.out.println("getQueryString:"+qString);
+        System.out.println("getQueryString:" + qString);
         if (qString != null) {
             byte[] bytes = new byte[qString.length()];
             try {
-                bytes=qString.getBytes(encoding);
+                bytes = qString.getBytes(encoding);
                 parseParameters(this.parameters, bytes, encoding);
             } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();;
+                e.printStackTrace();
+                ;
             }
         }
         String contentType = getContentType();
-        if (contentType == null)
-            contentType = "";
+        if (contentType == null) contentType = "";
         int semicolon = contentType.indexOf(';');
         if (semicolon >= 0) {
             contentType = contentType.substring(0, semicolon).trim();
-        }
-        else {
+        } else {
             contentType = contentType.trim();
         }
-        if ("POST".equals(getMethod()) && (getContentLength() > 0)
-                && "application/x-www-form-urlencoded".equals(contentType)) {
+        if ("POST".equals(getMethod()) && (getContentLength() > 0) && "application/x-www-form-urlencoded".equals(contentType)) {
             try {
                 int max = getContentLength();
                 int len = 0;
@@ -191,31 +206,27 @@ public class HttpRequest implements HttpServletRequest {
                     throw new RuntimeException("Content length mismatch");
                 }
                 parseParameters(this.parameters, buf, encoding);
-            }
-            catch (UnsupportedEncodingException ue) {
-            }
-            catch (IOException e) {
+            } catch (UnsupportedEncodingException ue) {
+            } catch (IOException e) {
                 throw new RuntimeException("Content read fail");
             }
         }
     }
 
     private byte convertHexDigit(byte b) {
-        if ((b >= '0') && (b <= '9')) return (byte)(b - '0');
-        if ((b >= 'a') && (b <= 'f')) return (byte)(b - 'a' + 10);
-        if ((b >= 'A') && (b <= 'F')) return (byte)(b - 'A' + 10);
+        if ((b >= '0') && (b <= '9')) return (byte) (b - '0');
+        if ((b >= 'a') && (b <= 'f')) return (byte) (b - 'a' + 10);
+        if ((b >= 'A') && (b <= 'F')) return (byte) (b - 'A' + 10);
         return 0;
     }
 
-    public void parseParameters(Map<String,String[]> map, byte[] data, String encoding)
-            throws UnsupportedEncodingException {
-        if (parsed)
-            return;
+    public void parseParameters(Map<String, String[]> map, byte[] data, String encoding) throws UnsupportedEncodingException {
+        if (parsed) return;
         System.out.println(data);
         if (data != null && data.length > 0) {
-            int    pos = 0;
-            int    ix = 0;
-            int    ox = 0;
+            int pos = 0;
+            int ix = 0;
+            int ox = 0;
             String key = null;
             String value = null;
             while (ix < data.length) {
@@ -224,7 +235,7 @@ public class HttpRequest implements HttpServletRequest {
                     case '&':
                         value = new String(data, 0, ox, encoding);
                         if (key != null) {
-                            putMapEntry(map,key, value);
+                            putMapEntry(map, key, value);
                             key = null;
                         }
                         ox = 0;
@@ -234,11 +245,10 @@ public class HttpRequest implements HttpServletRequest {
                         ox = 0;
                         break;
                     case '+':
-                        data[ox++] = (byte)' ';
+                        data[ox++] = (byte) ' ';
                         break;
                     case '%':
-                        data[ox++] = (byte)((convertHexDigit(data[ix++]) << 4)
-                                + convertHexDigit(data[ix++]));
+                        data[ox++] = (byte) ((convertHexDigit(data[ix++]) << 4) + convertHexDigit(data[ix++]));
                         break;
                     default:
                         data[ox++] = c;
@@ -247,13 +257,13 @@ public class HttpRequest implements HttpServletRequest {
             //The last value does not end in '&'.  So save it now.
             if (key != null) {
                 value = new String(data, 0, ox, encoding);
-                putMapEntry(map,key, value);
+                putMapEntry(map, key, value);
             }
         }
         parsed = true;
     }
 
-    private static void putMapEntry( Map<String,String[]> map, String name, String value) {
+    private static void putMapEntry(Map<String, String[]> map, String name, String value) {
         String[] newValues = null;
         String[] oldValues = (String[]) map.get(name);
         if (oldValues == null) {
@@ -345,10 +355,8 @@ public class HttpRequest implements HttpServletRequest {
     public String getParameter(String name) {
         parseParameters();
         String values[] = parameters.get(name);
-        if (values != null)
-            return (values[0]);
-        else
-            return (null);
+        if (values != null) return (values[0]);
+        else return (null);
     }
 
     @Override
@@ -367,10 +375,8 @@ public class HttpRequest implements HttpServletRequest {
     public String[] getParameterValues(String name) {
         parseParameters();
         String values[] = parameters.get(name);
-        if (values != null)
-            return (values);
-        else
-            return (null);
+        if (values != null) return (values);
+        else return (null);
     }
 
     @Override
@@ -578,8 +584,7 @@ public class HttpRequest implements HttpServletRequest {
 
     @Override
     public HttpSession getSession(boolean create) {
-        if (sessionFacade != null)
-            return sessionFacade;
+        if (sessionFacade != null) return sessionFacade;
         if (sessionid != null) {
             session = HttpConnector.sessions.get(sessionid);
             if (session != null) {
