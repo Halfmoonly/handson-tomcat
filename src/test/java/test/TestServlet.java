@@ -15,28 +15,33 @@ public class TestServlet extends HttpServlet{
         System.out.println("Enter doGet()");
         System.out.println("parameter name : "+request.getParameter("name"));
         System.out.println("parameter docid : "+request.getParameter("docid"));
+        HttpSession session = request.getSession(true);
+        String user = (String) session.getAttribute("user");
+        System.out.println("get user from session : " + user);
+        if (user == null || user.equals("")) {
+            session.setAttribute("user", "yale");
+        }
 
         response.setCharacterEncoding("UTF-8");
         String doc = "<!DOCTYPE html> \n" +
                 "<html>\n" +
                 "<head><meta charset=\"utf-8\"><title>Test</title></head>\n"+
                 "<body bgcolor=\"#f0f0f0\">\n" +
-                "<h1 align=\"center\">" + "Test GET 你好" + "</h1>\n";
+                "<h1 align=\"center\">" + "Test 你好" + "</h1>\n";
         System.out.println(doc);
         response.getWriter().println(doc);
 
     }
-    @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response)throws ServletException, IOException {
         System.out.println("Enter doPost()");
-        System.out.println("parameter body name : "+request.getParameter("name"));
-        System.out.println("parameter body publisher : "+request.getParameter("publisher"));
+        System.out.println("parameter name : "+request.getParameter("name"));
+        System.out.println("parameter publisher : "+request.getParameter("publisher"));
         response.setCharacterEncoding("UTF-8");
         String doc = "<!DOCTYPE html> \n" +
                 "<html>\n" +
                 "<head><meta charset=\"utf-8\"><title>Test</title></head>\n"+
                 "<body bgcolor=\"#f0f0f0\">\n" +
-                "<h1 align=\"center\">" + "Test POST 你好" + "</h1>\n";
+                "<h1 align=\"center\">" + "Test 你好" + "</h1>\n";
         System.out.println(doc);
         response.getWriter().println(doc);
 

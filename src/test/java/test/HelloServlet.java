@@ -1,5 +1,7 @@
 package test;
 
+import jdk.internal.util.xml.impl.Pair;
+
 import java.io.IOException;
 
 import javax.servlet.Servlet;
@@ -12,7 +14,6 @@ public class HelloServlet implements Servlet{
 
     @Override
     public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
-        System.out.println("into HelloServlet...");
         res.setCharacterEncoding("UTF-8");
 
         String doc = "<!DOCTYPE html> \n" +

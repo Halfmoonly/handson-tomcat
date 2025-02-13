@@ -1,9 +1,9 @@
 package server;
 
-import java.io.IOException;
-import java.io.InputStream;
 import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class SocketInputStream extends ServletInputStream {
     private static final byte CR = (byte) '\r';
@@ -12,15 +12,18 @@ public class SocketInputStream extends ServletInputStream {
     private static final byte HT = (byte) '\t';
     private static final byte COLON = (byte) ':';
     private static final int LC_OFFSET = 'A' - 'a';
+
     protected byte buf[];
     protected int count;
     protected int pos;
+
     protected InputStream is;
+
     public SocketInputStream(InputStream is, int bufferSize) {
         this.is = is;
         buf = new byte[bufferSize];
     }
-    //按照格式解析请求行
+
     public void readRequestLine(HttpRequestLine requestLine)
             throws IOException {
         int chr = 0;
@@ -31,11 +34,11 @@ public class SocketInputStream extends ServletInputStream {
             }
         } while ((chr == CR) || (chr == LF));
         pos--;
+
         int maxRead = requestLine.method.length;
         int readStart = pos;
         int readCount = 0;
         boolean space = false;
-        //这里先获取请求的method
         while (!space) {
             if (pos >= count) {
                 int val = read();
@@ -52,14 +55,20 @@ public class SocketInputStream extends ServletInputStream {
             readCount++;
             pos++;
         }
+
         requestLine.methodEnd = readCount - 1;
+
+        // Reading URI
         maxRead = requestLine.uri.length;
         readStart = pos;
         readCount = 0;
+
         space = false;
+
         boolean eol = false;
-        //再获取请求的uri
+
         while (!space) {
+            // We're at the end of the internal buffer
             if (pos >= count) {
                 int val = read();
                 if (val == -1)
@@ -74,13 +83,19 @@ public class SocketInputStream extends ServletInputStream {
             readCount++;
             pos++;
         }
+
         requestLine.uriEnd = readCount - 1;
+
+        // Reading protocol
         maxRead = requestLine.protocol.length;
         readStart = pos;
         readCount = 0;
-        //最后获取请求的协议
+
         while (!eol) {
+            // We're at the end of the internal buffer
             if (pos >= count) {
+                // Copying part (or all) of the internal buffer to the line
+                // buffer
                 int val = read();
                 if (val == -1)
                     throw new IOException("requestStream.readline.error");
@@ -97,11 +112,13 @@ public class SocketInputStream extends ServletInputStream {
             }
             pos++;
         }
+
         requestLine.protocolEnd = readCount;
     }
-    //读头信息，格式是header name:value
+
     public void readHeader(HttpHeader header)
-            throws IOException {
+        throws IOException {
+
         int chr = read();
         if ((chr == CR) || (chr == LF)) { // Skipping CR
             if (chr == CR)
@@ -112,14 +129,16 @@ public class SocketInputStream extends ServletInputStream {
         } else {
             pos--;
         }
-        // 读取header名
+
+        // Reading the header name
         int maxRead = header.name.length;
         int readStart = pos;
         int readCount = 0;
+
         boolean colon = false;
-        //以:分隔，前面的字符认为是header name
+
         while (!colon) {
-            // 我们处于内部缓冲区的末尾
+            // We're at the end of the internal buffer
             if (pos >= count) {
                 int val = read();
                 if (val == -1) {
@@ -139,19 +158,25 @@ public class SocketInputStream extends ServletInputStream {
             readCount++;
             pos++;
         }
+
         header.nameEnd = readCount - 1;
-        // 读取 header 值（可以多行）
+
+        // Reading the header value (which can be spanned over multiple lines)
         maxRead = header.value.length;
         readStart = pos;
         readCount = 0;
+
         int crPos = -2;
+
         boolean eol = false;
         boolean validLine = true;
-        //处理行，因为一个header的值有可能多行(一行的前面是空格或者制表符)，需要连续处理
+
         while (validLine) {
             boolean space = true;
+
             // Skipping spaces
-            // Note : 只有前面的空格被跳过
+            // Note : Only leading white spaces are removed. Trailing white
+            // spaces are not.
             while (space) {
                 // We're at the end of the internal buffer
                 if (pos >= count) {
@@ -169,7 +194,7 @@ public class SocketInputStream extends ServletInputStream {
                     space = false;
                 }
             }
-            //一直处理到行结束
+
             while (!eol) {
                 // We're at the end of the internal buffer
                 if (pos >= count) {
@@ -181,19 +206,20 @@ public class SocketInputStream extends ServletInputStream {
                     pos = 0;
                     readStart = 0;
                 }
-                //回车换行表示行结束
                 if (buf[pos] == CR) {
                 } else if (buf[pos] == LF) {
                     eol = true;
                 } else {
+                    // FIXME : Check if binary conversion is working fine
                     int ch = buf[pos] & 0xff;
                     header.value[readCount] = (char) ch;
                     readCount++;
                 }
                 pos++;
             }
-            //再往前读一个字符，如果是空格或制表符号则继续，多行处理的情况
+
             int nextChr = read();
+
             if ((nextChr != SP) && (nextChr != HT)) {
                 pos--;
                 validLine = false;
@@ -202,9 +228,12 @@ public class SocketInputStream extends ServletInputStream {
                 header.value[readCount] = ' ';
                 readCount++;
             }
+
         }
+
         header.valueEnd = readCount;
     }
+
     @Override
     public int read() throws IOException {
         if (pos >= count) {
@@ -215,9 +244,11 @@ public class SocketInputStream extends ServletInputStream {
         }
         return buf[pos++] & 0xff;
     }
+
     public int available() throws IOException {
         return (count - pos) + is.available();
     }
+
     public void close() throws IOException {
         if (is == null) {
             return;
@@ -226,6 +257,7 @@ public class SocketInputStream extends ServletInputStream {
         is = null;
         buf = null;
     }
+
     protected void fill() throws IOException {
         pos = 0;
         count = 0;
@@ -234,15 +266,19 @@ public class SocketInputStream extends ServletInputStream {
             count = nRead;
         }
     }
+
     @Override
     public boolean isFinished() {
         return false;
     }
+
     @Override
     public boolean isReady() {
         return false;
     }
+
     @Override
     public void setReadListener(ReadListener readListener) {
+
     }
 }

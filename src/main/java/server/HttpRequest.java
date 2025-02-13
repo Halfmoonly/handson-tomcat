@@ -21,9 +21,12 @@ public class HttpRequest implements HttpServletRequest {
     int port;
     private boolean parsed = false;
     protected HashMap<String, String> headers = new HashMap<>();
-    //既存储GET路径参数，也存储POST请求体参数
     protected Map<String, String[]> parameters = new ConcurrentHashMap<>();
     HttpRequestLine requestLine = new HttpRequestLine();
+    Cookie[] cookies;
+    HttpSession session;
+    String sessionid;
+    SessionFacade sessionFacade;
 
     public HttpRequest(InputStream input) {
         this.input = input;
@@ -41,8 +44,29 @@ public class HttpRequest implements HttpServletRequest {
         } catch (ServletException e) {
             e.printStackTrace();
         }
+
     }
 
+    private void parseRequestLine() {
+        int question = requestLine.indexOf("?");
+        if (question >= 0) {
+            queryString = new String(requestLine.uri, question + 1, requestLine.uriEnd - question - 1);
+            uri = new String(requestLine.uri, 0, question);
+            int semicolon = uri.indexOf(DefaultHeaders.JSESSIONID_NAME);
+            if (semicolon >= 0) {
+                sessionid = uri.substring(semicolon+DefaultHeaders.JSESSIONID_NAME.length());
+                uri = uri.substring(0, semicolon);
+            }
+        } else {
+            queryString = null;
+            uri = new String(requestLine.uri, 0, requestLine.uriEnd);
+            int semicolon = uri.indexOf(DefaultHeaders.JSESSIONID_NAME);
+            if (semicolon >= 0) {
+                sessionid = uri.substring(semicolon+DefaultHeaders.JSESSIONID_NAME.length());
+                uri = uri.substring(0, semicolon);
+            }
+        }
+    }
 
     private void parseConnection(Socket socket) {
         address = socket.getInetAddress();
@@ -60,7 +84,7 @@ public class HttpRequest implements HttpServletRequest {
                     throw new ServletException("httpProcessor.parseHeaders.colon");
                 }
             }
-            String name = new String(header.name, 0, header.nameEnd);
+            String name = new String(header.name,0,header.nameEnd);
             String value = new String(header.value, 0, header.valueEnd);
             // Set the corresponding request headers
             if (name.equals(DefaultHeaders.ACCEPT_LANGUAGE_NAME)) {
@@ -75,58 +99,79 @@ public class HttpRequest implements HttpServletRequest {
                 headers.put(name, value);
             } else if (name.equals(DefaultHeaders.TRANSFER_ENCODING_NAME)) {
                 headers.put(name, value);
-            } else {
+            } else if (name.equals(DefaultHeaders.COOKIE_NAME)) {
+                headers.put(name, value);
+                Cookie[] cookiearr = parseCookieHeader(value);
+                this.cookies = cookiearr;
+                for (int i = 0; i < cookies.length; i++) {
+                    if (cookies[i].getName().equals("jsessionid")) {
+                        this.sessionid = cookies[i].getValue();
+                    }
+                }
+            }
+            else {
                 headers.put(name, value);
             }
         }
     }
 
-    /**
-     * GET请求 URI 请求参数的解析
-     */
-    private void parseRequestLine() {
-        int question = requestLine.indexOf("?");
-        if (question >= 0) {
-            queryString = new String(requestLine.uri, question + 1, requestLine.uriEnd - question - 1);
-            uri = new String(requestLine.uri, 0, question);
-        } else {
-            queryString = null;
-            uri = new String(requestLine.uri, 0, requestLine.uriEnd);
+    public  Cookie[] parseCookieHeader(String header) {
+        if ((header == null) || (header.length() < 1) )
+            return (new Cookie[0]);
+        ArrayList<Cookie> cookieal = new ArrayList<>();
+        while (header.length() > 0) {
+            int semicolon = header.indexOf(';');
+            if (semicolon < 0)
+                semicolon = header.length();
+            if (semicolon == 0)
+                break;
+
+            String token = header.substring(0, semicolon);
+            if (semicolon < header.length())
+                header = header.substring(semicolon + 1);
+            else
+                header = "";
+
+            try {
+                int equals = token.indexOf('=');
+                if (equals > 0) {
+                    String name = token.substring(0, equals).trim();
+                    String value = token.substring(equals+1).trim();
+                    cookieal.add(new Cookie(name, value));
+                }
+            } catch (Throwable e) {
+            }
         }
+        return ((Cookie[]) cookieal.toArray (new Cookie [cookieal.size()]));
     }
 
-    /**
-     * POST请求 请求体的解析
-     */
     protected void parseParameters() {
-        //设置字符集
         String encoding = getCharacterEncoding();
+        System.out.println(encoding);
         if (encoding == null) {
             encoding = "ISO-8859-1";
         }
-        //获取查询串
         String qString = getQueryString();
+        System.out.println("getQueryString:"+qString);
         if (qString != null) {
             byte[] bytes = new byte[qString.length()];
             try {
-                bytes = qString.getBytes(encoding);
+                bytes=qString.getBytes(encoding);
                 parseParameters(this.parameters, bytes, encoding);
             } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-                ;
+                e.printStackTrace();;
             }
         }
-        //获取 content Type
         String contentType = getContentType();
         if (contentType == null)
             contentType = "";
         int semicolon = contentType.indexOf(';');
         if (semicolon >= 0) {
             contentType = contentType.substring(0, semicolon).trim();
-        } else {
+        }
+        else {
             contentType = contentType.trim();
         }
-        //对POST方法，从body中解析参数
         if ("POST".equals(getMethod()) && (getContentLength() > 0)
                 && "application/x-www-form-urlencoded".equals(contentType)) {
             try {
@@ -146,70 +191,69 @@ public class HttpRequest implements HttpServletRequest {
                     throw new RuntimeException("Content length mismatch");
                 }
                 parseParameters(this.parameters, buf, encoding);
-            } catch (UnsupportedEncodingException ue) {
-            } catch (IOException e) {
+            }
+            catch (UnsupportedEncodingException ue) {
+            }
+            catch (IOException e) {
                 throw new RuntimeException("Content read fail");
             }
         }
     }
 
-    //十六进制字符到数字的转换
     private byte convertHexDigit(byte b) {
-        if ((b >= '0') && (b <= '9')) return (byte) (b - '0');
-        if ((b >= 'a') && (b <= 'f')) return (byte) (b - 'a' + 10);
-        if ((b >= 'A') && (b <= 'F')) return (byte) (b - 'A' + 10);
+        if ((b >= '0') && (b <= '9')) return (byte)(b - '0');
+        if ((b >= 'a') && (b <= 'f')) return (byte)(b - 'a' + 10);
+        if ((b >= 'A') && (b <= 'F')) return (byte)(b - 'A' + 10);
         return 0;
     }
 
-    public void parseParameters(Map<String, String[]> map, byte[] data, String encoding)
+    public void parseParameters(Map<String,String[]> map, byte[] data, String encoding)
             throws UnsupportedEncodingException {
         if (parsed)
             return;
+        System.out.println(data);
         if (data != null && data.length > 0) {
-            int pos = 0;
-            int ix = 0;
-            int ox = 0;
+            int    pos = 0;
+            int    ix = 0;
+            int    ox = 0;
             String key = null;
             String value = null;
-            //解析参数串，处理特殊字符
             while (ix < data.length) {
                 byte c = data[ix++];
                 switch ((char) c) {
-                    case '&':   //两个参数之间的分隔符，遇到这个字符保存已经解析的key和value
+                    case '&':
                         value = new String(data, 0, ox, encoding);
                         if (key != null) {
-                            putMapEntry(map, key, value);
+                            putMapEntry(map,key, value);
                             key = null;
                         }
                         ox = 0;
                         break;
-                    case '=': //参数的key/value的分隔符
+                    case '=':
                         key = new String(data, 0, ox, encoding);
                         ox = 0;
                         break;
-                    case '+': //特殊字符，空格
-                        data[ox++] = (byte) ' ';
+                    case '+':
+                        data[ox++] = (byte)' ';
                         break;
-                    case '%': //处理%NN表示的ASCII字符
-                        data[ox++] = (byte) ((convertHexDigit(data[ix++]) << 4)
+                    case '%':
+                        data[ox++] = (byte)((convertHexDigit(data[ix++]) << 4)
                                 + convertHexDigit(data[ix++]));
                         break;
                     default:
                         data[ox++] = c;
                 }
             }
-            //最后一个参数没有&结尾
             //The last value does not end in '&'.  So save it now.
             if (key != null) {
                 value = new String(data, 0, ox, encoding);
-                putMapEntry(map, key, value);
+                putMapEntry(map,key, value);
             }
         }
         parsed = true;
     }
 
-    //给key设置新值，多值用数组来存储
-    private static void putMapEntry(Map<String, String[]> map, String name, String value) {
+    private static void putMapEntry( Map<String,String[]> map, String name, String value) {
         String[] newValues = null;
         String[] oldValues = (String[]) map.get(name);
         if (oldValues == null) {
@@ -299,9 +343,7 @@ public class HttpRequest implements HttpServletRequest {
 
     @Override
     public String getParameter(String name) {
-        if (parameters.isEmpty()) {
-            parseParameters();
-        }
+        parseParameters();
         String values[] = parameters.get(name);
         if (values != null)
             return (values[0]);
@@ -446,7 +488,7 @@ public class HttpRequest implements HttpServletRequest {
 
     @Override
     public Cookie[] getCookies() {
-        return null;
+        return this.cookies;
     }
 
     @Override
@@ -531,16 +573,33 @@ public class HttpRequest implements HttpServletRequest {
 
     @Override
     public HttpSession getSession() {
-        return null;
+        return this.sessionFacade;
     }
 
     @Override
     public HttpSession getSession(boolean create) {
-        return null;
+        if (sessionFacade != null)
+            return sessionFacade;
+        if (sessionid != null) {
+            session = HttpConnector.sessions.get(sessionid);
+            if (session != null) {
+                sessionFacade = new SessionFacade(session);
+                return sessionFacade;
+            } else {
+                session = HttpConnector.createSession();
+                sessionFacade = new SessionFacade(session);
+                return sessionFacade;
+            }
+        } else {
+            session = HttpConnector.createSession();
+            sessionFacade = new SessionFacade(session);
+            sessionid = session.getId();
+            return sessionFacade;
+        }
     }
 
     public String getSessionId() {
-        return null;
+        return this.sessionid;
     }
 
     @Override
