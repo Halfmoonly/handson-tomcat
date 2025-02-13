@@ -582,6 +582,11 @@ public class HttpRequest implements HttpServletRequest {
         return this.sessionFacade;
     }
 
+    /**
+     * 类似于spring, getSession既可以获取已有的session，也可以为我们创建新的session
+     * @param create
+     * @return
+     */
     @Override
     public HttpSession getSession(boolean create) {
         if (sessionFacade != null) return sessionFacade;
