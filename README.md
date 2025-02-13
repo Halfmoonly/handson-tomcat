@@ -43,19 +43,19 @@ Server: tomcat
 Hello World!
 ```
 
-与handson-spring一样，handson-tomcat依旧采取多分支开发的方式，分支结构如下：
+与`handson-spring`一样，`handson-tomcat`依旧采取多分支开发的方式，分支结构如下：
 - a-server01：实现一个最简单的静态资源服务器，根据请求返回基本的响应结构
-- a-server02：服务器引入commons-lang3，自定义动态资源Servlet，并支持Servlet内容动态填充
-- a-server03：服务器引入javax.servlet-api，适配标准的Servlet规范
-- b-connector01：引入Tomcat连接层，同时对HttpServer一拆为二Connector和Processor，做到职责分离
-- b-connector02：提高服务器性能，实现Processor对象池
-- b-connector03：进一步提高服务器性能，设计线程 Processor，同时实现与Connector线程之间的同步机制
-- b-connector04：对 Request 相关的代码适配Servlet规范，封装RequestLine并解析请求第一行信息，和DefaultHeaders请求头信息
-- b-connector05：对 Response 相关的代码适配Servlet规范，并进行响应码，响应头的解析
-- b-connector06：门面模式的应用，分别对HttpRequest和HttpResponse适配门面，选择性的隐藏内部细节
-- b-connector07：更进一步，对HttpRequest进行GET路径参数，以及POST请求体的解析
-- b-connector08：对请求侧设计Cookie，解析请求路径或者请求头Cookie中的jsessionid，对服务器设计存储Sessions集合<jsessionid,session>
-- b-connector09：对响应体设计Set-Cookie，使之有状态，终于可以把多次没有上下文关联的 HTTP 访问视为同一个用户访问。
+- a-server02：服务器引入`commons-lang3`，自定义动态资源`Servlet`，并支持`Servlet`内容动态填充
+- a-server03：服务器引入`javax.servlet-api`，对用户自定义的`Servlet`适配标准的`Servlet`规范
+- b-connector01：引入`Tomcat`连接层，同时对`HttpServer`一拆为二`Connector`和`Processor`，做到职责分离
+- b-connector02：提高服务器性能，实现`Processor`对象池
+- b-connector03：进一步提高服务器性能，设计线程`Processor`，同时实现与`Connector`线程之间的同步机制
+- b-connector04：对`Request`相关的代码适配`Servlet`规范，封装`RequestLine`并解析请求第一行信息，和`DefaultHeaders`请求头信息
+- b-connector05：对`Response`相关的代码适配`Servlet`规范，并进行响应码，响应头的解析
+- b-connector06：门面模式的应用，分别对`HttpRequest`和`HttpResponse`适配门面，选择性的隐藏内部细节
+- b-connector07：更进一步，对`HttpRequest`进行`GET`路径参数，以及`POST`请求体的解析
+- b-connector08：对请求侧设计`Cookie`，解析请求路径或者请求头`Cookie`中的`jsessionid`，对服务器设计存储`Sessions`集合`<jsessionid,session>`
+- b-connector09：对响应头设计`Set-Cookie`，使之有状态，终于可以把多次没有上下文关联的`HTTP`访问视为同一个用户访问。
 - 更多分支正在更新中...
 
 main分支包含以上所有功能特性，全量/增量开发文档见[docs](docs)目录
