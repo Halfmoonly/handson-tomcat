@@ -1,0 +1,8 @@
+### uri中和cookie中均有jsessionid，则cookie中的jsessionid会覆盖uri中的jsessionid
+GET http://localhost:8080/servlet/test.TestServlet;jsessionid=5AC6268DD8D4D5D1FDF5D41E9F2FD960?name=Tommy&docid=TS0001
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br
+Cookie: jsessionid=abc123; sex=male; age=18
+Connection: keep-alive

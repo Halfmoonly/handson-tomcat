@@ -1,7 +1,5 @@
 package test;
 
-import jdk.internal.util.xml.impl.Pair;
-
 import java.io.IOException;
 
 import javax.servlet.Servlet;
