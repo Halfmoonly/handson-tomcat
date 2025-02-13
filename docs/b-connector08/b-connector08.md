@@ -468,7 +468,20 @@ public class HttpConnector implements Runnable {
     }
 ```
 
-但有个问题是 Request 请求每次都是新创建的，那么 Session 一定是空的，所以即使请求携带了sessionId，全局 Map里面也没有相应的session, 因此在 getSession 方法内我们会根据请求的sessionId进一步判断在 全局 Map 中是否存在 session，如果没有则服务器自己生成一份<sessionId, session>, 而不使用请求携带的sessionId
+但有个问题是，本节的响应并没有返回jsessionid，这就导致我们的请求即使携带了jsessionid，服务器全局Map里面对应的 Session 也一定是空的，因此有了这段逻辑
+```java
+        if (sessionid != null) {
+            session = HttpConnector.sessions.get(sessionid);
+            if (session != null) {
+                sessionFacade = new SessionFacade(session);
+                return sessionFacade;
+            } else {//因此有了这段逻辑, 全局 Map 中是否存在当前jsessionid对应的 session，如果没有则服务器自己生成一份<sessionId, session>, 而不使用请求携带的sessionId
+                session = HttpConnector.createSession();
+                sessionFacade = new SessionFacade(session);
+                return sessionFacade;
+            }
+        }
+```
 
 ## 本节测试
 测试类程序如下，可以看到，程序员在Servlet中的doGet/doPost方法签名处拿到的request以及response，就是Tomcat服务器为我们处理并封装好的对象，其内部各个字段皆是我们所需。
