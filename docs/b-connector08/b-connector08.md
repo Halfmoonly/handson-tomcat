@@ -440,11 +440,69 @@ public class HttpConnector implements Runnable {
             HttpResponse response = new HttpResponse(output);
             response.setRequest(request);
 ```
-代码里注释为“handle session”的代码就是我们添加的，判断是否存在 Sessionid，不存在则调用 getSession 方法，这个方法内会判断有没有 Session，如果没有服务器就创建并保存在sessions的Map中。
+代码里注释为“handle session”的代码就是我们添加的，判断是否存在 SessionId，不存在则调用 getSession 方法，这个方法内会判断有没有 Session，如果没有就由服务器创建并保存在sessions的Map中。
 
 同时，如果请求中带有 jsessionid，我们会用这个 jsessionid 从 HttpConnector 类的全局 Map 里查找相应的 Session。
 
+但有个问题是 Request 请求每次都是新创建的，那么 Session 一定是空的，所以即使请求携带了sessionId，全局 Map里面也没有相应的session, 因此在 getSession 方法内我们会根据请求的sessionId进一步判断在 全局 Map 中是否存在 session，如果没有则服务器自己生成一份<sessionId, session>, 而不使用请求携带的sessionId
+
 ## 本节测试
+测试类程序如下，可以看到，程序员在Servlet中的doGet/doPost方法签名处拿到的request以及response，就是Tomcat服务器为我们处理并封装好的对象，其内部各个字段皆是我们所需。
+
+这就是Tomcat框架的设计哲学，程序员直接取值即可
+```java
+
+public class TestServlet extends HttpServlet{
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    public void doGet(HttpServletRequest request, HttpServletResponse response)throws ServletException, IOException {
+        System.out.println("Enter doGet()");
+        System.out.println("parameter name : "+request.getParameter("name"));
+        System.out.println("parameter docid : "+request.getParameter("docid"));
+        HttpSession session = request.getSession(true);
+        String user = (String) session.getAttribute("user");
+        System.out.println("get user from session in server: " + user);
+        if (user == null || user.equals("")) {
+            System.out.println("gen user to session in server...");
+            session.setAttribute("user", "Halfmoonly");
+        }
+        user = (String) session.getAttribute("user");
+        System.out.println("get user from session in server: " + user);
+
+        int i = 0;
+        for (Map.Entry<String, HttpSession> entry: HttpConnector.sessions.entrySet()){
+            String id = entry.getKey();
+            HttpSession s = entry.getValue();
+            System.out.println(i++ +"-->jsessionid= "+id+" session="+ s.getAttribute("user"));
+        }
+
+        response.setCharacterEncoding("UTF-8");
+        String doc = "<!DOCTYPE html> \n" +
+                "<html>\n" +
+                "<head><meta charset=\"utf-8\"><title>Test</title></head>\n"+
+                "<body bgcolor=\"#f0f0f0\">\n" +
+                "<h1 align=\"center\">" + "Test 你好" + "</h1>\n";
+        System.out.println(doc);
+        response.getWriter().println(doc);
+
+    }
+    public void doPost(HttpServletRequest request, HttpServletResponse response)throws ServletException, IOException {
+        System.out.println("Enter doPost()");
+        System.out.println("parameter name : "+request.getParameter("name"));
+        System.out.println("parameter publisher : "+request.getParameter("publisher"));
+        response.setCharacterEncoding("UTF-8");
+        String doc = "<!DOCTYPE html> \n" +
+                "<html>\n" +
+                "<head><meta charset=\"utf-8\"><title>Test</title></head>\n"+
+                "<body bgcolor=\"#f0f0f0\">\n" +
+                "<h1 align=\"center\">" + "Test 你好" + "</h1>\n";
+        System.out.println(doc);
+        response.getWriter().println(doc);
+
+    }
+}
+```
 
 同样在编写完毕HelloServlet后，我们需要单独编译这个类，生成 HelloServlet.class，把编译后的文件放到 /webroot/test 目录下，原因在于我们的服务器需要从 webroot 目录下获取资源文件。
 
@@ -547,3 +605,6 @@ get user from session in server: Halfmoonly
 <body bgcolor="#f0f0f0">
 <h1 align="center">Test 你好</h1>
 ```
+可以看到虽然每次请求都携带了jsessionid，但是每次服务器都重新生成了新的sessionId和session.
+
+所以目前的遗留问题是，为了多次往返的时候带上 jsessionid，我们需要在 Response 返回参数中回写，让客户端程序也能获取到，应该怎么处理呢？下节见
