@@ -1,0 +1,2 @@
+###
+GET http://localhost:8080/servlet/test.TestServlet?name=Tommy&docid=TS0001
