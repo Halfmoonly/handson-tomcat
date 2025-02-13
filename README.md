@@ -54,7 +54,7 @@ Hello World!
 - b-connector05：对 Response 相关的代码适配Servlet规范，并进行响应码，响应头的解析
 - b-connector06：门面模式的应用，分别对HttpRequest和HttpResponse适配门面，选择性的隐藏内部细节
 - b-connector07：更进一步，对HttpRequest进行GET路径参数，以及POST请求体的解析
-- b-connector08：对请求侧设计Cookie，对服务器设计存储Sessions集合<jsessionid,session>
+- b-connector08：对请求侧设计Cookie，解析请求路径或者请求头Cookie中的jsessionid，对服务器设计存储Sessions集合<jsessionid,session>
 - b-connector09：对响应体设计Set-Cookie，使之有状态，终于可以把多次没有上下文关联的 HTTP 访问视为同一个用户访问。
 - 更多分支正在更新中...
 
