@@ -576,6 +576,16 @@ public class HttpRequest implements HttpServletRequest {
         return this.sessionFacade;
     }
 
+    /**
+     * 三合一方法：
+     * 判断请求是否携带 SessionId，初次请求没有携带则调用 getSession 方法让服务器为我们创建<sessionid,session>并保存在sessions的Map中。
+     *
+     * 同时，类似于springApplicationContext.getBean(), 如果请求中带有 jsessionid，我们会用这个 jsessionid 从 HttpConnector 类的全局 Map 里查找相应的 Session。见如下getSession实现
+     *
+     * 最后，如果请求携带的jsessionid无效，即服务器sessions的map中不存在响应的session，则服务器再次新建个<sessionid,session>并保存在sessions的Map中
+     * @param
+     * @return
+     */
     @Override
     public HttpSession getSession(boolean create) {
         if (sessionFacade != null)

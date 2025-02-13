@@ -440,9 +440,9 @@ public class HttpConnector implements Runnable {
             HttpResponse response = new HttpResponse(output);
             response.setRequest(request);
 ```
-代码里注释为“handle session”的代码就是我们添加的，判断是否存在 SessionId，不存在则调用 getSession 方法，这个方法内会判断有没有 Session，如果没有就由服务器创建并保存在sessions的Map中。
+代码里注释为“handle session”的代码就是我们添加的，判断请求是否携带 SessionId，初次请求没有携带则调用 getSession 方法让服务器为我们创建<sessionid,session>并保存在sessions的Map中。
 
-同时，如果请求中带有 jsessionid，我们会用这个 jsessionid 从 HttpConnector 类的全局 Map 里查找相应的 Session。见如下getSession实现
+同时，类似于springApplicationContext.getBean(), 如果请求中带有 jsessionid，我们会用这个 jsessionid 从 HttpConnector 类的全局 Map 里查找相应的 Session。见如下getSession实现
 
 ```java
     @Override
