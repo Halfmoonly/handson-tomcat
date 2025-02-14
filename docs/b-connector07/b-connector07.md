@@ -3,6 +3,7 @@
 我们这节课需要研究的部分如下:
 1. HttpRequestLine：在实际的请求结构中，请求的 URI 后缀往往会带上请求参数，例如 /app1/servlet1?username=Tommy&docid=TS0001，路径和参数之间用“?”分隔，参数与参数之间使用“&”隔开。
 2. 请求体解析。POST方法
+3. 最后改造 SocketInputStream，由继承 InputStream 改为继承 ServletInputStream。使输入流适配Servlet规范
 
 ## GET请求 URI 请求参数的解析
 前面我们做到了解析 RequestLine 第一行，包括请求方法、URI 与请求协议。但在实际请求中，URI 后面经常会增加请求参数。比如：
@@ -73,7 +74,7 @@ name=Professional%20Ajax&publisher=Wiley
 还有 POST 可以混合，也就是 multipart/form-data 多部分，有的是文本，有的是二进制，比如图片之类的。我们现在也先暂时放到一边。
 
 ## 改造SocketInputStream
-首先我们改造 SocketInputStream，由继承 InputStream 改为继承 ServletInputStream。你可以看一下完整代码。
+首先我们改造 SocketInputStream，由继承 InputStream 改为继承 ServletInputStream。使输入流适配Servlet规范，你可以看一下完整代码。
 
 ```java
 package server;
