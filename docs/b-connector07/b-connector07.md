@@ -3,6 +3,7 @@
 我们这节课需要研究的部分如下:
 1. HttpRequestLine：在实际的请求结构中，请求的 URI 后缀往往会带上请求参数，例如 /app1/servlet1?username=Tommy&docid=TS0001，路径和参数之间用“?”分隔，参数与参数之间使用“&”隔开。
 2. 请求体解析。POST方法
+3. 最后改造 SocketInputStream，由继承 InputStream 改为继承 ServletInputStream。使输入流适配Servlet规范
 
 ## GET请求 URI 请求参数的解析
 前面我们做到了解析 RequestLine 第一行，包括请求方法、URI 与请求协议。但在实际请求中，URI 后面经常会增加请求参数。比如：
@@ -73,7 +74,7 @@ name=Professional%20Ajax&publisher=Wiley
 还有 POST 可以混合，也就是 multipart/form-data 多部分，有的是文本，有的是二进制，比如图片之类的。我们现在也先暂时放到一边。
 
 ## 改造SocketInputStream
-首先我们改造 SocketInputStream，由继承 InputStream 改为继承 ServletInputStream。你可以看一下完整代码。
+首先我们改造 SocketInputStream，由继承 InputStream 改为继承 ServletInputStream。使输入流适配Servlet规范，你可以看一下完整代码。
 
 ```java
 package server;
@@ -460,11 +461,11 @@ private static void putMapEntry( Map<String,String[]> map, String name, String v
 
 ```java
     private byte convertHexDigit(byte b) {
-        if ((b >= '0') && (b <= '9')) return (byte)(b - '0');
-        if ((b >= 'a') && (b <= 'f')) return (byte)(b - 'a' + 10);
-        if ((b >= 'A') && (b <= 'F')) return (byte)(b - 'A' + 10);
-        return 0;
-    }
+    if ((b >= '0') && (b <= '9')) return (byte)(b - '0');
+    if ((b >= 'a') && (b <= 'f')) return (byte)(b - 'a' + 10);
+    if ((b >= 'A') && (b <= 'F')) return (byte)(b - 'A' + 10);
+    return 0;
+}
 ```
 
 先拿到“2”这个字符，变成数字 2，再拿到“0”这个字符，变成数字 0，随后进行计算：2*16+0=32，再按照 ascii 变成字符，也就是空格。
@@ -476,31 +477,31 @@ private static void putMapEntry( Map<String,String[]> map, String name, String v
 
 ```java
   public String getParameter(String name) {
-      parseParameters();
-      String values[] = (String[]) parameters.get(name);
-      if (values != null)
+    parseParameters();
+    String values[] = (String[]) parameters.get(name);
+    if (values != null)
         return (values[0]);
-      else
+    else
         return (null);  }
 
-  public Map<String, String[]> getParameterMap() {
-      parseParameters();
-      return (this.parameters);
-  }
+public Map<String, String[]> getParameterMap() {
+    parseParameters();
+    return (this.parameters);
+}
 
-  public Enumeration<String> getParameterNames() {
-      parseParameters();
-      return (Collections.enumeration(parameters.keySet()));
-  }
+public Enumeration<String> getParameterNames() {
+    parseParameters();
+    return (Collections.enumeration(parameters.keySet()));
+}
 
-  public String[] getParameterValues(String name) {
-      parseParameters();
-      String values[] = (String[]) parameters.get(name);
-      if (values != null)
+public String[] getParameterValues(String name) {
+    parseParameters();
+    String values[] = (String[]) parameters.get(name);
+    if (values != null)
         return (values);
-      else
+    else
         return null;
-  }
+}
 ```
 
 这里我们初步完成了 HttpRequest 类里对请求参数 parameter 的解析(GET路径参数和POST请求体参数)，所有的处理都是在获取到具体参数的时候，才调用 parseParameters() 方法，把时序放到这里，是为了性能考虑。
@@ -548,45 +549,45 @@ HttpRequest#parseParameters()中执行了is.close();
 ```java
         //对POST方法，从body中解析参数
         if ("POST".equals(getMethod()) && (getContentLength() > 0)
-                && "application/x-www-form-urlencoded".equals(contentType)) {
-            try {
-                int max = getContentLength();
-                int len = 0;
-                byte buf[] = new byte[getContentLength()];
-                ServletInputStream is = getInputStream();
+        && "application/x-www-form-urlencoded".equals(contentType)) {
+        try {
+int max = getContentLength();
+int len = 0;
+byte buf[] = new byte[getContentLength()];
+ServletInputStream is = getInputStream();
                 while (len < max) {
-                    int next = is.read(buf, len, max - len);
+int next = is.read(buf, len, max - len);
                     if (next < 0) {
-                        break;
-                    }
-                    len += next;
-                }
-                is.close();
-                if (len < max) {
-                    throw new RuntimeException("Content length mismatch");
-                }
-                parseParameters(this.parameters, buf, encoding);
-            } catch (UnsupportedEncodingException ue) {
-            } catch (IOException e) {
-                throw new RuntimeException("Content read fail");
-            }
+        break;
         }
+len += next;
+                }
+                        is.close();
+                if (len < max) {
+        throw new RuntimeException("Content length mismatch");
+                }
+parseParameters(this.parameters, buf, encoding);
+            } catch (UnsupportedEncodingException ue) {
+        } catch (IOException e) {
+        throw new RuntimeException("Content read fail");
+            }
+                    }
 ```
 导致解析POST请求体中第二个参数&publisher=Wiley的时候，遇到java.lang.NullPointerException
 
 解决方案：HttpRequest#getParameter(String name)，补充if (parameters.isEmpty())判断
 ```java
     @Override
-    public String getParameter(String name) {
-        if (parameters.isEmpty()) {
-            parseParameters();
-        }
-        String values[] = parameters.get(name);
-        if (values != null)
-            return (values[0]);
-        else
-            return (null);
+public String getParameter(String name) {
+    if (parameters.isEmpty()) {
+        parseParameters();
     }
+    String values[] = parameters.get(name);
+    if (values != null)
+        return (values[0]);
+    else
+        return (null);
+}
 ```
 
 致此，POST请求体解析大功告成
