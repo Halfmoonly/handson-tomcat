@@ -1,7 +1,8 @@
 # handson-tomcat
 致敬传奇，手写框架之Tomcat，帮作者点点⭐⭐攻克Web系统底层原理，领悟服务器设计哲学，带你卷向更高处
 
-![HalfmoonlyCat.png](HalfmoonlyCat.png)
+Tomcat宏观架构如下：
+![img.png](architecture.png)
 
 在手写Tomcat之前，你需要先掌握HTTP请求/响应的基本格式：
 
