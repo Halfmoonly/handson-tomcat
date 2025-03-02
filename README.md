@@ -57,7 +57,7 @@ Hello World!
 - b-connector06：门面模式的应用，分别对`HttpRequest`和`HttpResponse`适配门面，选择性的隐藏内部细节
 - b-connector07：更进一步，对`HttpRequest`进行`GET`路径参数，以及`POST`请求体的解析，同时改造 SocketInputStream，由继承 InputStream 改为继承 ServletInputStream。使输入流适配Servlet规范
 - b-connector08：对请求侧设计`Cookie`，解析请求路径或者请求头`Cookie`中的`jsessionid`，对服务器设计存储`Sessions`集合`<jsessionid,session>`
-- b-connector09：对响应头设计`Set-Cookie`，使之有状态，终于可以把多次没有上下文关联的`HTTP`访问视为同一个用户访问。
+- b-connector09：对响应头设计`Set-Cookie`，使之有状态，终于可以把多次没有上下文关联的`HTTP`访问视为同一个用户访问。在 Response 返回参数中回写 Session 信息，使得客户端程序能够接受这个信息，下次请求 Server时携带Session信息
 - 更多分支正在更新中...
 
 main分支包含以上所有功能特性，全量/增量开发文档见[docs](docs)目录
