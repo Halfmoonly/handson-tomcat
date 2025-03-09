@@ -1,13 +1,18 @@
 package server;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
 public class HttpProcessor implements Runnable{
-    Socket socket;
-    boolean available = false;
-    HttpConnector connector;
+    private Socket socket;
+    private boolean available = false;
+    private HttpConnector connector;
+    private int serverPort = 0;
+    private boolean keepAlive = false;
+    private boolean http11 = true;
+
     public HttpProcessor(HttpConnector connector) {
         this.connector = connector;
     }
@@ -40,38 +45,60 @@ public class HttpProcessor implements Runnable{
             input = socket.getInputStream();
             output = socket.getOutputStream();
 
-            // create Request object and parse
-            HttpRequest request = new HttpRequest(input);
-            request.parse(socket);
+            keepAlive = true;
+            while (keepAlive) {
+                // create Request object and parse
+                HttpRequest request = new HttpRequest(input);
+                request.parse(socket);
 
-            // handle session
-            if (request.getSessionId() == null || request.getSessionId().equals("")) {
-                request.getSession(true);
-            }
+                // handle session
+                if (request.getSessionId() == null || request.getSessionId().equals("")) {
+                    request.getSession(true);
+                }
 
-            // create Response object
-            HttpResponse response = new HttpResponse(output);
-            response.setRequest(request);
+                // create Response object
+                HttpResponse response = new HttpResponse(output);
+                response.setRequest(request);
 //               response.sendStaticResource();
 
-            // check if this is a request for a servlet or a static resource
-            // a request for a servlet begins with "/servlet/"
-            if (request.getUri().startsWith("/servlet/")) {
-                ServletProcessor processor = new ServletProcessor();
-                processor.process(request, response);
-            }
-            else {
-                StaticResourceProcessor processor = new StaticResourceProcessor();
-                processor.process(request, response);
-            }
+                request.setResponse(response);
 
+                try {
+                    response.sendHeaders();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+
+                // check if this is a request for a servlet or a static resource
+                // a request for a servlet begins with "/servlet/"
+                if (request.getUri().startsWith("/servlet/")) {
+                    ServletProcessor processor = new ServletProcessor();
+                    processor.process(request, response);
+                }
+                else {
+                    StaticResourceProcessor processor = new StaticResourceProcessor();
+                    processor.process(request, response);
+                }
+
+                finishResponse(response);
+                System.out.println("response header connection------"+response.getHeader("Connection"));
+                if ("close".equals(response.getHeader("Connection"))) {
+                    keepAlive = false;
+                }
+            }
+            System.out.println("请求到达三次，服务端设置keepAlive------"+keepAlive+"------服务端即将关闭");
             // Close the socket
             socket.close();
+            socket = null;
 
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+    }
+
+    private void finishResponse(HttpResponse response) {
+        response.finishResponse();
     }
 
     synchronized void assign(Socket socket) {
