@@ -1,10 +1,9 @@
 package server;
 
 import javax.servlet.http.HttpSession;
+import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.*;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Map;
@@ -17,6 +16,7 @@ public class HttpConnector implements Runnable {
     int curProcessors = 0;
     Deque<HttpProcessor> processors = new ArrayDeque<>();
     public static Map<String, HttpSession> sessions = new ConcurrentHashMap<>();
+    public static URLClassLoader loader = null;
 
     public void run() {
         ServerSocket serverSocket = null;
@@ -26,6 +26,18 @@ public class HttpConnector implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
+        }
+
+        try {
+            URL[] urls = new URL[1];
+            URLStreamHandler streamHandler = null;
+            File classPath = new File(HttpServer.WEB_ROOT);
+            String repository = (new URL("file", null, classPath.getCanonicalPath() + File.separator)).toString() ;
+            urls[0] = new URL(null, repository, streamHandler);
+            loader = new URLClassLoader(urls);
+        }
+        catch (IOException e) {
+            System.out.println(e.toString() );
         }
 
         // initialize processors pool
