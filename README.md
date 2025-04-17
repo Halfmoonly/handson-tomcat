@@ -60,6 +60,7 @@ Hello World!
 - b-connector09：对响应头设计`Set-Cookie`，使之有状态，终于可以把多次没有上下文关联的`HTTP`访问视为同一个用户访问。在 Response 返回参数中回写 Session 信息，使得客户端程序能够接受这个信息，下次请求 Server时携带Session信息
 - b-connector10：本节我们简单探讨了一下 Keep-alive 和 chunked 模式，让同一个 Socket 可以用于多次访问，减少了 Socket 的连接和关闭。
 - c-container-01：本节初步引入了容器的实现，ServletContainer，同时为了后续增强对Servlet生命周期的管理用ServletWrapper代替了Servlet
+- c-container-02：参考Tomcat项目结构，形成了两层容器，ServletContext(原ServletContainer)和ServletWrapper，Tomcat 把 Wrapper 也看作一种容器，也就是隶属于 Context 之下的子容器（Child Container）
 - 更多分支正在更新中...
 
 main分支包含以上所有功能特性，全量/增量开发文档见[docs](docs)目录
