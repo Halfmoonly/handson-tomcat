@@ -1,10 +1,9 @@
 package server;
 
-import java.util.Enumeration;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionContext;
+import java.util.Enumeration;
 
 public class SessionFacade implements HttpSession{
     private HttpSession session;

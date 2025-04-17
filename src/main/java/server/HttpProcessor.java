@@ -72,7 +72,7 @@ public class HttpProcessor implements Runnable{
                 // check if this is a request for a servlet or a static resource
                 // a request for a servlet begins with "/servlet/"
                 if (request.getUri().startsWith("/servlet/")) {
-                    ServletProcessor processor = new ServletProcessor();
+                    ServletProcessor processor = new ServletProcessor(this.connector);
                     processor.process(request, response);
                 }
                 else {
@@ -86,7 +86,7 @@ public class HttpProcessor implements Runnable{
                     keepAlive = false;
                 }
             }
-            System.out.println("请求到达三次，服务端设置keepAlive------"+keepAlive+"------服务端即将关闭");
+
             // Close the socket
             socket.close();
             socket = null;
@@ -111,6 +111,7 @@ public class HttpProcessor implements Runnable{
         }
         // Store the newly available Socket and notify our thread
         this.socket = socket;
+        //由httpConnector准备好了socket给到httpProcessor之后，通知唤醒httpProcessor
         available = true;
         notifyAll();
     }
@@ -125,6 +126,7 @@ public class HttpProcessor implements Runnable{
         }
         // Notify the Connector that we have received this Socket
         Socket socket = this.socket;
+        //当httpProcessor自身被唤醒之后，相当于要消费这个socket，因此将socket的可获得性置为false。  等待下次httpConnector准备好了新的socket给到httpProcessor之后，通知唤醒httpProcessor
         available = false;
         notifyAll();
 
