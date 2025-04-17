@@ -1,4 +1,4 @@
-package server;
+package com.minit.connector.http;
 
 public class DefaultHeaders {
     static final String HOST_NAME = "host";

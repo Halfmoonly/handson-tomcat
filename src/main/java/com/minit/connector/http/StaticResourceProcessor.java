@@ -1,5 +1,6 @@
-package server;
+package com.minit.connector.http;
 
+import com.minit.startup.Bootstrap;
 import org.apache.commons.lang3.text.StrSubstitutor;
 
 import java.io.File;
@@ -25,13 +26,13 @@ public class StaticResourceProcessor {
             "Date: ${ZonedDateTime}\r\n"+
             "\r\n";
 
-    public void process(HttpRequest request, HttpResponse response) throws IOException {
+    public void process(HttpRequestImpl request, HttpResponseImpl response) throws IOException {
         byte[] bytes = new byte[BUFFER_SIZE];
         FileInputStream fis = null;
         OutputStream output = null;
         try {
             output = response.getOutput();
-            File file = new File(HttpServer.WEB_ROOT, request.getUri());
+            File file = new File(Bootstrap.WEB_ROOT, request.getUri());
             if (file.exists()) {
                 String head = composeResponseHead(file);
                 output.write(head.getBytes("utf-8"));

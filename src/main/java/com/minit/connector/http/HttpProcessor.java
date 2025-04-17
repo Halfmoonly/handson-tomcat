@@ -1,4 +1,4 @@
-package server;
+package com.minit.connector.http;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,7 +48,7 @@ public class HttpProcessor implements Runnable{
             keepAlive = true;
             while (keepAlive) {
                 // create Request object and parse
-                HttpRequest request = new HttpRequest(input);
+                HttpRequestImpl request = new HttpRequestImpl(input);
                 request.parse(socket);
 
                 // handle session
@@ -57,7 +57,7 @@ public class HttpProcessor implements Runnable{
                 }
 
                 // create Response object
-                HttpResponse response = new HttpResponse(output);
+                HttpResponseImpl response = new HttpResponseImpl(output);
                 response.setRequest(request);
 //               response.sendStaticResource();
 
@@ -97,7 +97,7 @@ public class HttpProcessor implements Runnable{
 
     }
 
-    private void finishResponse(HttpResponse response) {
+    private void finishResponse(HttpResponseImpl response) {
         response.finishResponse();
     }
 
@@ -111,7 +111,6 @@ public class HttpProcessor implements Runnable{
         }
         // Store the newly available Socket and notify our thread
         this.socket = socket;
-        //由httpConnector准备好了socket给到httpProcessor之后，通知唤醒httpProcessor
         available = true;
         notifyAll();
     }
@@ -126,7 +125,6 @@ public class HttpProcessor implements Runnable{
         }
         // Notify the Connector that we have received this Socket
         Socket socket = this.socket;
-        //当httpProcessor自身被唤醒之后，相当于要消费这个socket，因此将socket的可获得性置为false。  等待下次httpConnector准备好了新的socket给到httpProcessor之后，通知唤醒httpProcessor
         available = false;
         notifyAll();
 

@@ -1,4 +1,4 @@
-package server;
+package com.minit.connector.http;
 
 public class HttpRequestLine {
     public static final int INITIAL_METHOD_SIZE = 8;

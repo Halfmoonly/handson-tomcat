@@ -1,4 +1,4 @@
-package server;
+package com.minit.connector.http;
 
 import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;

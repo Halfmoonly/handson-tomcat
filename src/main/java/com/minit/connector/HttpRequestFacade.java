@@ -1,4 +1,4 @@
-package server;
+package com.minit.connector;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
@@ -14,7 +14,7 @@ import java.util.Map;
 public class HttpRequestFacade implements HttpServletRequest {
     private HttpServletRequest request;
 
-    public HttpRequestFacade(HttpRequest request) {
+    public HttpRequestFacade(HttpServletRequest request) {
         this.request = request;
     }
 

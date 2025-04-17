@@ -1,4 +1,4 @@
-package server;
+package com.minit.util;
 
 import javax.servlet.http.Cookie;
 

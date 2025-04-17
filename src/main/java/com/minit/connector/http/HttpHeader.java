@@ -1,4 +1,4 @@
-package server;
+package com.minit.connector.http;
 
 public class HttpHeader {
      public static final int INITIAL_NAME_SIZE = 64;

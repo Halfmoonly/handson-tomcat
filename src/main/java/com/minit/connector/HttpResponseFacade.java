@@ -1,4 +1,4 @@
-package server;
+package com.minit.connector;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
@@ -10,7 +10,7 @@ import java.util.Locale;
 
 public class HttpResponseFacade implements HttpServletResponse {
     private HttpServletResponse response;
-    public HttpResponseFacade(HttpResponse response) {
+    public HttpResponseFacade(HttpServletResponse response) {
         this.response = response;
     }
 

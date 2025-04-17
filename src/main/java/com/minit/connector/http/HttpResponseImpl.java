@@ -1,4 +1,6 @@
-package server;
+package com.minit.connector.http;
+
+import com.minit.util.CookieTools;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
@@ -11,8 +13,8 @@ import java.io.PrintWriter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class HttpResponse implements HttpServletResponse {
-    HttpRequest request;
+public class HttpResponseImpl implements HttpServletResponse {
+    HttpRequestImpl request;
     OutputStream output;
     PrintWriter writer;
 
@@ -27,11 +29,11 @@ public class HttpResponse implements HttpServletResponse {
     int status = HttpServletResponse.SC_OK;
     ArrayList<Cookie> cookies = new ArrayList<>();
 
-    public HttpResponse() {
+    public HttpResponseImpl() {
 
     }
 
-    public HttpResponse(OutputStream output) {
+    public HttpResponseImpl(OutputStream output) {
         this.output = output;
     }
 
@@ -39,7 +41,7 @@ public class HttpResponse implements HttpServletResponse {
         this.output = output;
     }
 
-    public void setRequest(HttpRequest request) {
+    public void setRequest(HttpRequestImpl request) {
         this.request = request;
     }
 
