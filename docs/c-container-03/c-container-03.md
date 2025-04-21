@@ -1,11 +1,11 @@
-容器内的纵向责任链模式Valve
 
 ![vertical-valve.png](img.png)
 ---
 
 本节我们做两件事情：
 1. 简单定义下日志组件,注意只是简单引入，与下文的责任链无关
-2. 引入容器内的职责链模式，注意这不是容器间的
+2. 引入逆序的责任链模式Pipeline+Valve
+
 
 我们将新增 Logger、Pipeline、Valve、ValveContext 接口，以及处理日志 Logger 与 Valve 的实现类等众多 Java 文件，具体内容后面我们会详细说明。你可以看一下现在这个项目的目录结构。
 ```shell
@@ -548,7 +548,7 @@ public class HttpConnector implements Connector, Runnable {
 
 引入日志组件后，我们转向第二部分，也是 Tomcat 设计里的一个特色：职责链。
 
-## 引入职责链模式(容器内纵向责任链模式)
+## 引入职责链模式(逆序的)
 当服务器要调用某个具体的 Servlet 的时候，是先经过这些 container 的 invoke() 方法，一层一层调用的。
 
 每一个 Container 内部在真正的任务执行前（如执行 Servlet），都会途径过滤层，这些层叫作 Valve，一个一个地执行 Valve 之后再执行 Servlet，这样可以给 Container 做一些过滤的操作，比如权限校验、日志打印、报错输出等。
@@ -560,7 +560,7 @@ public void invoke(Request request, Response response) throws IOException, Servl
 }
 ```
 
-简单来讲，就是每一层的 Container 内都有一个 Pipeline，也是一根纵向糖葫芦链条，这根糖葫芦是许多 Valve 串起来的。
+简单来讲，就是每一层的 Container 内都有一个 Pipeline，也是一根糖葫芦链条，这根糖葫芦是许多 Valve 串起来的。但是逆序触发的
 
 调用某个 Container 的 invoke()，就是找到 Pipeline 的第一个 Valve 进行调用，第一个 Valve 会调用下一个，一个一个传下去，到最后一个 Basic Valve，然后调用下一层容器，直到结束。
 
