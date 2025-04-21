@@ -63,7 +63,7 @@ Hello World!
 - c-container-02：参考Tomcat项目结构，形成了两层容器，ServletContext(原ServletContainer)和ServletWrapper，Tomcat 把 Wrapper 也看作一种容器，也就是隶属于 Context 之下的子容器（Child Container）
 - c-container-03：
   - 简单引入日志模块
-  - 引入逆序职责链模式Pipeline+Valve，Valve设计用于Tomcat容器级处理流程，强调基础阀BasicValve的重要性，因此设计为逆序职责链
+  - 引入逆序职责链模式Pipeline+Valve，Valve设计用于Tomcat容器级处理流程，强调基础阀BasicValve的重要性用于容器间调用，因此设计为逆序职责链
 - c-container-04：引入顺序职责链模式Filter，Filter设计主要用于Tomcat容器内最后面的Web应用层面请求和响应处理，因此设计为顺序职责链
 - 更多分支正在更新中...
 
