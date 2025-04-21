@@ -1,5 +1,7 @@
 package com.minit.connector;
 
+import com.minit.connector.http.HttpRequestImpl;
+
 import javax.servlet.*;
 import javax.servlet.http.*;
 import java.io.BufferedReader;
@@ -14,7 +16,7 @@ import java.util.Map;
 public class HttpRequestFacade implements HttpServletRequest {
     private HttpServletRequest request;
 
-    public HttpRequestFacade(HttpServletRequest request) {
+    public HttpRequestFacade(HttpRequestImpl request) {
         this.request = request;
     }
 

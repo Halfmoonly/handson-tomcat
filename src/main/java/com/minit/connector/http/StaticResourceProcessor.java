@@ -1,6 +1,6 @@
 package com.minit.connector.http;
 
-import com.minit.startup.Bootstrap;
+import com.minit.startup.BootStrap;
 import org.apache.commons.lang3.text.StrSubstitutor;
 
 import java.io.File;
@@ -32,7 +32,7 @@ public class StaticResourceProcessor {
         OutputStream output = null;
         try {
             output = response.getOutput();
-            File file = new File(Bootstrap.WEB_ROOT, request.getUri());
+            File file = new File(BootStrap.WEB_ROOT, request.getUri());
             if (file.exists()) {
                 String head = composeResponseHead(file);
                 output.write(head.getBytes("utf-8"));

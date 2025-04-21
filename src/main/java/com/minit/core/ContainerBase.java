@@ -1,15 +1,45 @@
 package com.minit.core;
 
-import com.minit.Container;
+import com.minit.*;
 
+import javax.servlet.ServletException;
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public abstract class ContainerBase implements Container {
-    protected Map<String, Container> children = new ConcurrentHashMap<>();
+public abstract class ContainerBase implements Container,Pipeline {
+    protected Map<String,Container> children = new ConcurrentHashMap<>();
     protected ClassLoader loader = null;
     protected String name = null;
     protected Container parent = null;
+    protected Logger logger = null;
+
+    protected Pipeline pipeline = new StandardPipeline(this);
+
+    public Pipeline getPipeline() {
+        return (this.pipeline);
+    }
+    public void invoke(Request request, Response response) throws IOException, ServletException {
+        System.out.println("ContainerBase invoke()");
+
+        pipeline.invoke(request, response);
+    }
+    public synchronized void addValve(Valve valve) {
+        pipeline.addValve(valve);
+    }
+    public Valve getBasic() {
+        return (pipeline.getBasic());
+    }
+    public Valve[] getValves() {
+        return (pipeline.getValves());
+    }
+    public synchronized void removeValve(Valve valve) {
+        pipeline.removeValve(valve);
+    }
+    public void setBasic(Valve valve) {
+        pipeline.setBasic(valve);
+    }
+
 
     public abstract String getInfo();
     public ClassLoader getLoader() {
@@ -19,17 +49,17 @@ public abstract class ContainerBase implements Container {
             return (parent.getLoader());
         return (null);
     }
-
     public synchronized void setLoader(ClassLoader loader) {
         ClassLoader oldLoader = this.loader;
-        if (oldLoader == loader) {
+        if (oldLoader == loader)
             return;
-        }
         this.loader = loader;
     }
 
     public String getName() {
+
         return (name);
+
     }
 
 
@@ -83,7 +113,6 @@ public abstract class ContainerBase implements Container {
     }
 
     public void removeChild(Container child) {
-
         synchronized(children) {
             if (children.get(child.getName()) == null)
                 return;
@@ -92,4 +121,50 @@ public abstract class ContainerBase implements Container {
         child.setParent(null);
 
     }
+
+    public Logger getLogger() {
+        if (logger != null)
+            return (logger);
+        if (parent != null)
+            return (parent.getLogger());
+        return (null);
+
+    }
+    public synchronized void setLogger(Logger logger) {
+        // Change components if necessary
+        Logger oldLogger = this.logger;
+        if (oldLogger == logger)
+            return;
+        this.logger = logger;
+
+    }
+
+    protected void log(String message) {
+        Logger logger = getLogger();
+        if (logger != null)
+            logger.log(logName() + ": " + message);
+        else
+            System.out.println(logName() + ": " + message);
+    }
+
+
+    protected void log(String message, Throwable throwable) {
+        Logger logger = getLogger();
+        if (logger != null)
+            logger.log(logName() + ": " + message, throwable);
+        else {
+            System.out.println(logName() + ": " + message + ": " + throwable);
+            throwable.printStackTrace(System.out);
+        }
+
+    }
+
+    protected String logName() {
+        String className = this.getClass().getName();
+        int period = className.lastIndexOf(".");
+        if (period >= 0)
+            className = className.substring(period + 1);
+        return (className + "[" + getName() + "]");
+    }
+
 }
