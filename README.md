@@ -65,6 +65,7 @@ Hello World!
   - 简单引入日志模块
   - 引入逆序职责链模式Pipeline+Valve，Valve设计用于Tomcat容器级处理流程，强调基础阀BasicValve的重要性用于容器间调用，因此设计为逆序职责链
 - c-container-04：引入顺序职责链模式Filter，Filter设计主要用于Tomcat容器内最后面的Web应用层面请求和响应处理，因此设计为顺序职责链
+- c-container-05：引入监听器Listener，首先定义了事件接口和监听接口，然后在容器Container启动过程中通过反射提前收集到所有用户配置的监听器实现，最后框架会在合适的位置执行用户的监听逻辑
 - 更多分支正在更新中...
 
 main分支包含以上所有功能特性，全量/增量开发文档见[docs](docs)目录
