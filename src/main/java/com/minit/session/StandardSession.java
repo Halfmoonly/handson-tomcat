@@ -1,21 +1,46 @@
 package com.minit.session;
 
 import com.minit.Session;
+import com.minit.SessionEvent;
+import com.minit.SessionListener;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionContext;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class StandardSession implements HttpSession, Session {
-
+    private transient ArrayList<SessionListener> listeners = new ArrayList<>();
     private String sessionid;
     private long creationTime;
     private boolean valid;
     private Map<String,Object> attributes = new ConcurrentHashMap<>();
+
+    public void addSessionListener(SessionListener listener) {
+        synchronized (listeners) {
+            listeners.add(listener);
+        }
+    }
+    public void removeSessionListener(SessionListener listener) {
+        synchronized (listeners) {
+            listeners.remove(listener);
+        }
+    }
+    public void fireSessionEvent(String type, Object data) {
+        if (listeners.size() < 1)
+            return;
+        SessionEvent event = new SessionEvent(this, type, data);
+        SessionListener list[] = new SessionListener[0];
+        synchronized (listeners) {
+            list = (SessionListener[]) listeners.toArray(list);
+        }
+        for (int i = 0; i < list.length; i++)
+            ((SessionListener) list[i]).sessionEvent(event);
+    }
 
     @Override
     public long getCreationTime() {
@@ -111,6 +136,7 @@ public class StandardSession implements HttpSession, Session {
 
     public void setId(String sessionId) {
         this.sessionid = sessionId;
+        fireSessionEvent(Session.SESSION_CREATED_EVENT, null);
     }
     @Override
     public String getInfo() {

@@ -1,4 +1,5 @@
 package com.minit.util;
+
 public class URLDecoder {
     public static String URLDecode(String str) {
         return URLDecode(str, null);
@@ -11,9 +12,11 @@ public class URLDecoder {
         bytes = str.getBytes();
         return URLDecode(bytes, enc);
     }
+
     public static String URLDecode(byte[] bytes) {
         return URLDecode(bytes, null);
     }
+
     public static String URLDecode(byte[] bytes, String enc) {
         if (bytes == null)
             return (null);
@@ -21,7 +24,7 @@ public class URLDecoder {
         int ix = 0;
         int ox = 0;
         while (ix < len) {
-            byte b = bytes[ix++];     // 获取要测试的字节
+            byte b = bytes[ix++];     // Get byte to test
             if (b == '+') {
                 b = (byte)' ';
             } else if (b == '%') {
@@ -39,6 +42,7 @@ public class URLDecoder {
         }
         return new String(bytes, 0, ox);
     }
+
     private static byte convertHexDigit( byte b ) {
         if ((b >= '0') && (b <= '9')) return (byte)(b - '0');
         if ((b >= 'a') && (b <= 'f')) return (byte)(b - 'a' + 10);

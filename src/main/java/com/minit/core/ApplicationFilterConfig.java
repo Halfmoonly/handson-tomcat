@@ -12,6 +12,7 @@ import java.util.Enumeration;
 import java.util.Map;
 
 final class ApplicationFilterConfig implements FilterConfig {
+
     public ApplicationFilterConfig(Context context, FilterDef filterDef)
             throws ClassCastException, ClassNotFoundException,
             IllegalAccessException, InstantiationException,
@@ -20,29 +21,37 @@ final class ApplicationFilterConfig implements FilterConfig {
         this.context = context;
         setFilterDef(filterDef);
     }
+
     private Context context = null;
     private Filter filter = null;
     private FilterDef filterDef = null;
+
     public String getFilterName() {
         return (filterDef.getFilterName());
     }
+
     public String getInitParameter(String name) {
         Map<String,String> map = filterDef.getParameterMap();
         if (map == null)
             return (null);
         else
             return ((String) map.get(name));
+
     }
+
     public Enumeration<String> getInitParameterNames() {
         Map<String,String> map = filterDef.getParameterMap();
         if (map == null)
             return Collections.enumeration(new ArrayList<String>());
         else
             return (Collections.enumeration(map.keySet()));
+
     }
+
     public ServletContext getServletContext() {
         return (this.context.getServletContext());
     }
+
     public String toString() {
         StringBuffer sb = new StringBuffer("ApplicationFilterConfig[");
         sb.append("name=");
@@ -52,43 +61,52 @@ final class ApplicationFilterConfig implements FilterConfig {
         sb.append("]");
         return (sb.toString());
     }
+
     Filter getFilter() throws ClassCastException, ClassNotFoundException,
             IllegalAccessException, InstantiationException, ServletException {
-        // 返回现有的过滤器实例（如果有的话）
+
+        // Return the existing filter instance, if any
         if (this.filter != null)
             return (this.filter);
-        // 确定我们将使用的类加载器
+
+        // Identify the class loader we will be using
         String filterClass = filterDef.getFilterClass();
         ClassLoader classLoader = null;
         classLoader = context.getLoader();
+
         ClassLoader oldCtxClassLoader =
                 Thread.currentThread().getContextClassLoader();
-        // 实例化这个过滤器的新实例并返回
+
+        // Instantiate a new instance of this filter and return it
         Class clazz = classLoader.loadClass(filterClass);
         this.filter = (Filter) clazz.newInstance();
         filter.init(this);
         return (this.filter);
+
     }
+
     FilterDef getFilterDef() {
         return (this.filterDef);
     }
+
     void release() {
         if (this.filter != null)
             filter.destroy();
         this.filter = null;
     }
+
     void setFilterDef(FilterDef filterDef)
             throws ClassCastException, ClassNotFoundException,
             IllegalAccessException, InstantiationException,
             ServletException {
         this.filterDef = filterDef;
         if (filterDef == null) {
-            // 释放之前分配的所有过滤器实例
+            // Release any previously allocated filter instance
             if (this.filter != null)
                 this.filter.destroy();
             this.filter = null;
         } else {
-            // 分配一个新的过滤器实例
+            // Allocate a new filter instance
             Filter filter = getFilter();
         }
     }
