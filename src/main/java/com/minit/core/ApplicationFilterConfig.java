@@ -71,14 +71,14 @@ final class ApplicationFilterConfig implements FilterConfig {
 
         // Identify the class loader we will be using
         String filterClass = filterDef.getFilterClass();
-        ClassLoader classLoader = null;
+        WebappClassLoader classLoader = null;
         classLoader = context.getLoader();
 
         ClassLoader oldCtxClassLoader =
                 Thread.currentThread().getContextClassLoader();
 
         // Instantiate a new instance of this filter and return it
-        Class clazz = classLoader.loadClass(filterClass);
+        Class clazz = classLoader.getClassLoader().loadClass(filterClass);
         this.filter = (Filter) clazz.newInstance();
         filter.init(this);
         return (this.filter);

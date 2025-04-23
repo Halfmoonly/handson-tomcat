@@ -82,9 +82,8 @@ public class HttpProcessor implements Runnable{
 
                 finishResponse(response);
                 System.out.println("response header connection------"+response.getHeader("Connection"));
-                if ("close".equals(response.getHeader("Connection"))) {
-                    keepAlive = false;
-                }
+                keepAlive = false;
+
             }
 
             // Close the socket

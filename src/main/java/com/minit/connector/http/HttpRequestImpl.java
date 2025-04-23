@@ -31,6 +31,14 @@ public class HttpRequestImpl implements HttpServletRequest, Request {
     String sessionid;
     StandardSessionFacade sessionFacade;
     private HttpResponseImpl response;
+    String docbase;
+
+    public String getDocbase() {
+        return docbase;
+    }
+    public void setDocbase(String docbase) {
+        this.docbase = docbase;
+    }
 
     public HttpRequestImpl() {
     }
@@ -73,6 +81,11 @@ public class HttpRequestImpl implements HttpServletRequest, Request {
                 sessionid = uri.substring(semicolon+tmp.length());
                 uri = uri.substring(0, semicolon);
             }
+            int contextslash = uri.indexOf("/", 1);
+            if (contextslash != -1) {
+                this.docbase = uri.substring(1, contextslash);
+                uri = uri.substring(contextslash);
+            }
         } else {
             queryString = null;
             uri = new String(requestLine.uri, 0, requestLine.uriEnd);
@@ -81,6 +94,11 @@ public class HttpRequestImpl implements HttpServletRequest, Request {
             if (semicolon >= 0) {
                 sessionid = uri.substring(semicolon+tmp.length());
                 uri = uri.substring(0, semicolon);
+            }
+            int contextslash = uri.indexOf("/", 1);
+            if (contextslash != -1) {
+                this.docbase = uri.substring(1, contextslash);
+                uri = uri.substring(contextslash);
             }
         }
     }

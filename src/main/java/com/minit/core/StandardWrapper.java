@@ -45,13 +45,13 @@ public class StandardWrapper extends ContainerBase implements Wrapper {
             throw new ServletException("servlet class has not been specified");
         }
 
-        ClassLoader classLoader = getLoader();
+        WebappClassLoader classLoader = getLoader();
 
         // Load the specified servlet class from the appropriate class loader
         Class classClass = null;
         try {
             if (classLoader!=null) {
-                classClass = classLoader.loadClass(actualClass);
+                classClass = classLoader.getClassLoader().loadClass(actualClass);
             }
         }
         catch (ClassNotFoundException e) {

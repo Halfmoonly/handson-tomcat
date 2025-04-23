@@ -1,12 +1,8 @@
 package com.minit.startup;
 
-import com.minit.Logger;
 import com.minit.connector.http.HttpConnector;
-import com.minit.core.ContainerListenerDef;
-import com.minit.core.FilterDef;
-import com.minit.core.FilterMap;
-import com.minit.core.StandardContext;
-import com.minit.logger.FileLogger;
+import com.minit.core.StandardHost;
+import com.minit.core.WebappClassLoader;
 
 import java.io.File;
 
@@ -18,34 +14,20 @@ public class BootStrap {
     public static void main(String[] args) {
         if (debug >= 1)
             log(".... startup ....");
+
+        System.setProperty("minit.base", WEB_ROOT);
+
         HttpConnector connector = new HttpConnector();
-        StandardContext container = new StandardContext();
+        StandardHost container = new StandardHost();
+
+        WebappClassLoader loader = new WebappClassLoader();
+        container.setLoader(loader);
+        loader.start();
+
         connector.setContainer(container);
         container.setConnector(connector);
 
-        Logger logger = new FileLogger();
-        container.setLogger(logger);
-
-        FilterDef filterDef = new FilterDef();
-        filterDef.setFilterName("TestFilter");
-        filterDef.setFilterClass("test.TestFilter");
-        container.addFilterDef(filterDef);
-
-        FilterMap filterMap = new FilterMap();
-        filterMap.setFilterName("TestFilter");
-        filterMap.setURLPattern("/*");
-        container.addFilterMap(filterMap);
-
-        container.filterStart();
-
-        ContainerListenerDef listenerDef = new ContainerListenerDef();
-        listenerDef.setListenerName("TestListener");
-        listenerDef.setListenerClass("test.TestListener");
-        container.addListenerDef(listenerDef);
-        container.listenerStart();
-
         container.start();
-
         connector.start();
     }
     private static void log(String message) {
@@ -58,4 +40,5 @@ public class BootStrap {
         exception.printStackTrace(System.out);
 
     }
+
 }

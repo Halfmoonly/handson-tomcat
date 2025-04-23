@@ -2,16 +2,12 @@ package com.minit.core;
 
 import com.minit.*;
 import com.minit.connector.http.HttpConnector;
-import com.minit.startup.BootStrap;
+import com.minit.logger.FileLogger;
 
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.net.URLStreamHandler;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
@@ -32,23 +28,33 @@ public class StandardContext extends ContainerBase implements Context{
     public StandardContext() {
         super();
         pipeline.setBasic(new StandardContextValve());
-
-        try {
-            // create a URLClassLoader
-            URL[] urls = new URL[1];
-            URLStreamHandler streamHandler = null;
-            File classPath = new File(BootStrap.WEB_ROOT);
-            String repository = (new URL("file", null, classPath.getCanonicalPath() + File.separator)).toString() ;
-            urls[0] = new URL(null, repository, streamHandler);
-            loader = new URLClassLoader(urls);
-        } catch (IOException e) {
-            System.out.println(e.toString() );
-        }
         log("Container created.");
     }
 
     public void start(){
         fireContainerEvent("Container Started",this);
+
+        Logger logger = new FileLogger();
+        setLogger(logger);
+
+        FilterDef filterDef = new FilterDef();
+        filterDef.setFilterName("TestFilter");
+        filterDef.setFilterClass("test.TestFilter");
+        addFilterDef(filterDef);
+
+        FilterMap filterMap = new FilterMap();
+        filterMap.setFilterName("TestFilter");
+        filterMap.setURLPattern("/*");
+        addFilterMap(filterMap);
+
+        filterStart();
+
+        ContainerListenerDef listenerDef = new ContainerListenerDef();
+        listenerDef.setListenerName("TestListener");
+        listenerDef.setListenerClass("test.TestListener");
+        addListenerDef(listenerDef);
+        listenerStart();
+
     }
 
     public void addContainerListener(ContainerListener listener) {
@@ -108,21 +114,19 @@ public class StandardContext extends ContainerBase implements Context{
     }
     @Override
     public String getDocBase() {
-        // TODO Auto-generated method stub
-        return null;
+        return this.docbase;
     }
     @Override
     public void setDocBase(String docBase) {
-        // TODO Auto-generated method stub
-
+        this.docbase = docBase;
     }
     @Override
     public String getPath() {
-        return null;
+        return this.path;
     }
     @Override
     public void setPath(String path) {
-
+        this.path = path;
     }
     @Override
     public ServletContext getServletContext() {
@@ -276,6 +280,7 @@ public class StandardContext extends ContainerBase implements Context{
             return (true);
         else
             return (false);
+
     }
 
     public boolean listenerStart() {
@@ -290,14 +295,14 @@ public class StandardContext extends ContainerBase implements Context{
                 try {
                     // Identify the class loader we will be using
                     String listenerClass = def.getListenerClass();
-                    ClassLoader classLoader = null;
+                    WebappClassLoader classLoader = null;
                     classLoader = this.getLoader();
 
                     ClassLoader oldCtxClassLoader =
                             Thread.currentThread().getContextClassLoader();
 
                     // Instantiate a new instance of this filter and return it
-                    Class<?> clazz = classLoader.loadClass(listenerClass);
+                    Class<?> clazz = classLoader.getClassLoader().loadClass(listenerClass);
                     listener = (ContainerListener) clazz.newInstance();
 
                     addContainerListener(listener);

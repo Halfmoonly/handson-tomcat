@@ -13,21 +13,22 @@ public class TestServlet extends HttpServlet{
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response)throws ServletException, IOException {
-        System.out.println("Enter doGet()");
-        System.out.println("parameter name : "+request.getParameter("name"));
+        System.out.println("Another TestServlet Enter doGet()");
+        System.out.println("Another TestServlet  parameter name : "+request.getParameter("name"));
 
         TestServlet.count++;
-        System.out.println("::::::::call count ::::::::: " + TestServlet.count);
-        if (TestServlet.count > 2) {
+        System.out.println("::::::::Another TestServlet call count ::::::::: " + TestServlet.count);
+        if (TestServlet.count>2) {
             response.addHeader("Connection", "close");
         }
-
         HttpSession session = request.getSession(true);
         String user = (String) session.getAttribute("user");
         System.out.println("get user from session : " + user);
         if (user == null || user.equals("")) {
             session.setAttribute("user", "yale");
         }
+
+
 
         response.setCharacterEncoding("UTF-8");
         String doc = "<!DOCTYPE html> \n" +
