@@ -71,7 +71,7 @@ handson-tomcat章节如下；
   - 引入逆序职责链模式`Pipeline+Valve`，`Valve`设计用于`Tomcat`容器级处理流程，强调基础阀`BasicValve`的重要性用于容器间调用，因此设计为逆序职责链
 - c-container-04：引入顺序职责链模式`Filter`，`Filter`设计主要用于`Tomcat`容器内最后面的Web应用层面请求和响应处理，因此设计为顺序职责链
 - c-container-05：引入监听器`Listener`，首先定义了事件接口和监听接口，然后在容器`Container`启动过程中通过反射提前收集到所有用户配置的监听器实现，最后框架会在合适的位置执行用户的监听逻辑
-- d-mapp-01：通过引入`StandardHost`，隔离`ClassLoader`与`StandardContext`。实现不同用户应用路径加载，甚至是同名应用（不同路径代表不同版本：`jvm:classloader+classname`）隔离加载
+- d-mapp-01：通过引入更大的容器`StandardHost`，隔离`URLClassLoader`与`StandardContext`。隔离不同用户的应用路径加载，甚至是同名应用（不同路径代表不同版本：`jvm:classloader+classname`）隔离加载
 - 更多分支正在更新中...
 
 main分支包含以上所有功能特性，全量/增量开发文档见[docs](docs)目录
