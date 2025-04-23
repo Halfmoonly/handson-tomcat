@@ -4,6 +4,7 @@ import com.minit.*;
 import com.minit.session.StandardSessionFacade;
 
 import javax.servlet.*;
+import javax.servlet.ServletContext;
 import javax.servlet.http.*;
 import java.io.BufferedReader;
 import java.io.IOException;

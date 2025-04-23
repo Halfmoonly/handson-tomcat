@@ -3,27 +3,27 @@ package com.minit.core;
 import java.net.URL;
 import java.net.URLClassLoader;
 
-public class WebappClassLoader extends URLClassLoader {
+public class CommonClassLoader extends URLClassLoader {
     protected boolean delegate = false;
     private ClassLoader parent = null;
     private ClassLoader system = null;
 
-    public WebappClassLoader() {
+    public CommonClassLoader() {
         super(new URL[0]);
         this.parent = getParent();
         system = getSystemClassLoader();
     }
-    public WebappClassLoader(URL[] urls) {
+    public CommonClassLoader(URL[] urls) {
         super(urls);
         this.parent = getParent();
         system = getSystemClassLoader();
     }
-    public WebappClassLoader(ClassLoader parent) {
+    public CommonClassLoader(ClassLoader parent) {
         super(new URL[0], parent);
         this.parent = parent;
         system = getSystemClassLoader();
     }
-    public WebappClassLoader(URL[] urls, ClassLoader parent) {
+    public CommonClassLoader(URL[] urls, ClassLoader parent) {
         super(urls, parent);
         this.parent = parent;
         system = getSystemClassLoader();
@@ -55,6 +55,9 @@ public class WebappClassLoader extends URLClassLoader {
     public Class<?> loadClass(String name, boolean resolve)
             throws ClassNotFoundException {
         Class<?> clazz = null;
+
+        // (0.2) Try loading the class with the system class loader, to prevent
+        //       the webapp from overriding J2SE classes
         try {
             clazz = system.loadClass(name);
             if (clazz != null) {
@@ -63,9 +66,12 @@ public class WebappClassLoader extends URLClassLoader {
                 return (clazz);
             }
         } catch (ClassNotFoundException e) {
+            // Ignore
         }
 
         boolean delegateLoad = delegate;
+
+        // (1) Delegate to our parent if requested
         if (delegateLoad) {
             ClassLoader loader = parent;
             if (loader == null)
@@ -82,6 +88,7 @@ public class WebappClassLoader extends URLClassLoader {
             }
         }
 
+        // (2) Search local repositories
         try {
             clazz = findClass(name);
             if (clazz != null) {
@@ -93,6 +100,7 @@ public class WebappClassLoader extends URLClassLoader {
             ;
         }
 
+        // (3) Delegate to parent unconditionally
         if (!delegateLoad) {
             ClassLoader loader = parent;
             if (loader == null)
@@ -108,6 +116,8 @@ public class WebappClassLoader extends URLClassLoader {
                 ;
             }
         }
+
+        // This class was not found
         throw new ClassNotFoundException(name);
     }
 

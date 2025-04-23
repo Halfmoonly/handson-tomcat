@@ -1,13 +1,14 @@
 package com.minit.core;
 
+import java.io.IOException;
+
+import javax.servlet.ServletException;
+
 import com.minit.Request;
 import com.minit.Response;
 import com.minit.ValveContext;
 import com.minit.connector.http.HttpRequestImpl;
 import com.minit.valves.ValveBase;
-
-import javax.servlet.ServletException;
-import java.io.IOException;
 
 public class StandardHostValve extends ValveBase{
 

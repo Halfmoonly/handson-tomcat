@@ -1,7 +1,8 @@
 package com.minit;
 
-import javax.servlet.ServletException;
 import java.io.IOException;
+
+import javax.servlet.ServletException;
 
 public interface ValveContext {
     public String getInfo();

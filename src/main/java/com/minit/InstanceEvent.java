@@ -1,10 +1,11 @@
 package com.minit;
 
+import java.util.EventObject;
+
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import java.util.EventObject;
 
 public final class InstanceEvent extends EventObject {
     public static final String BEFORE_INIT_EVENT = "beforeInit";

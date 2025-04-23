@@ -1,15 +1,17 @@
 package com.minit.core;
 
-import com.minit.Context;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Map;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Map;
+
+import com.minit.Context;
+import com.minit.Loader;
 
 final class ApplicationFilterConfig implements FilterConfig {
 
@@ -71,7 +73,7 @@ final class ApplicationFilterConfig implements FilterConfig {
 
         // Identify the class loader we will be using
         String filterClass = filterDef.getFilterClass();
-        WebappClassLoader classLoader = null;
+        Loader classLoader = null;
         classLoader = context.getLoader();
 
         ClassLoader oldCtxClassLoader =

@@ -1,13 +1,19 @@
 package com.minit.core;
 
+import java.io.IOException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.minit.Request;
 import com.minit.Response;
 import com.minit.ValveContext;
+import com.minit.connector.HttpRequestFacade;
+import com.minit.connector.HttpResponseFacade;
 import com.minit.connector.http.HttpRequestImpl;
+import com.minit.connector.http.HttpResponseImpl;
 import com.minit.valves.ValveBase;
-
-import javax.servlet.ServletException;
-import java.io.IOException;
 
 final class StandardContextValve extends ValveBase {
     private static final String info =

@@ -1,7 +1,7 @@
 package com.minit.connector.http;
 
-import com.minit.startup.BootStrap;
 import org.apache.commons.lang3.text.StrSubstitutor;
+import com.minit.startup.BootStrap;
 
 import java.io.File;
 import java.io.FileInputStream;

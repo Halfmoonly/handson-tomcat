@@ -295,7 +295,7 @@ public class StandardContext extends ContainerBase implements Context{
                 try {
                     // Identify the class loader we will be using
                     String listenerClass = def.getListenerClass();
-                    WebappClassLoader classLoader = null;
+                    Loader classLoader = null;
                     classLoader = this.getLoader();
 
                     ClassLoader oldCtxClassLoader =

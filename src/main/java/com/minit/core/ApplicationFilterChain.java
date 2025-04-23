@@ -1,16 +1,22 @@
 package com.minit.core;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.minit.connector.HttpRequestFacade;
 import com.minit.connector.HttpResponseFacade;
 import com.minit.connector.http.HttpRequestImpl;
 import com.minit.connector.http.HttpResponseImpl;
-
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
 
 final class ApplicationFilterChain implements FilterChain {
     public ApplicationFilterChain() {

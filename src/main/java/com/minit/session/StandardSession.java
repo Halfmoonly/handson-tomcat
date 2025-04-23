@@ -4,14 +4,15 @@ import com.minit.Session;
 import com.minit.SessionEvent;
 import com.minit.SessionListener;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpSessionContext;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpSessionContext;
 
 public class StandardSession implements HttpSession, Session {
     private transient ArrayList<SessionListener> listeners = new ArrayList<>();

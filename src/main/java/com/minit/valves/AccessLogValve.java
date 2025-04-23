@@ -1,15 +1,5 @@
 package com.minit.valves;
 
-import com.minit.Request;
-import com.minit.Response;
-import com.minit.ValveContext;
-import com.minit.connector.http.HttpResponseImpl;
-
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -17,6 +7,17 @@ import java.io.PrintWriter;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
+
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.minit.Request;
+import com.minit.Response;
+import com.minit.ValveContext;
+import com.minit.connector.http.HttpResponseImpl;
 
 public final class AccessLogValve extends ValveBase {
 

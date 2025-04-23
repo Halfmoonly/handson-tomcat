@@ -2,13 +2,14 @@ package com.minit.connector;
 
 import com.minit.connector.http.HttpResponseImpl;
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.Locale;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 
 public class HttpResponseFacade implements HttpServletResponse {
     private HttpServletResponse response;

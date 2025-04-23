@@ -1,5 +1,8 @@
 package com.minit.connector.http;
 
+import com.minit.connector.http.HttpHeader;
+import com.minit.connector.http.HttpRequestLine;
+
 import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
 import java.io.IOException;

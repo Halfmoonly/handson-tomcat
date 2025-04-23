@@ -1,7 +1,5 @@
 package com.minit;
 
-import com.minit.core.WebappClassLoader;
-
 import javax.servlet.ServletException;
 import java.io.IOException;
 
@@ -9,8 +7,8 @@ public interface Container {
     public static final String ADD_CHILD_EVENT = "addChild";
     public static final String REMOVE_CHILD_EVENT = "removeChild";
 
-    public WebappClassLoader getLoader();
-    public void setLoader(WebappClassLoader loader);
+    public Loader getLoader();
+    public void setLoader(Loader loader);
     public String getName();
     public void setName(String name);
     public Container getParent();

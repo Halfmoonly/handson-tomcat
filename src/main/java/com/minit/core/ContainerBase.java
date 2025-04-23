@@ -1,15 +1,16 @@
 package com.minit.core;
 
-import com.minit.*;
-
-import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.servlet.ServletException;
+
+import com.minit.*;
+
 public abstract class ContainerBase implements Container,Pipeline {
     protected Map<String,Container> children = new ConcurrentHashMap<>();
-    protected WebappClassLoader loader = null;
+    protected Loader loader = null;
     protected String name = null;
     protected Container parent = null;
     protected Logger logger = null;
@@ -44,18 +45,18 @@ public abstract class ContainerBase implements Container,Pipeline {
 
 
     public abstract String getInfo();
-    public WebappClassLoader getLoader() {
+    public Loader getLoader() {
         if (loader != null)
             return (loader);
         if (parent != null)
             return (parent.getLoader());
         return (null);
     }
-    public synchronized void setLoader(WebappClassLoader loader) {
+    public synchronized void setLoader(Loader loader) {
         loader.setPath(path);
         loader.setDocbase(docbase);
         loader.setContainer(this);
-        WebappClassLoader oldLoader = this.loader;
+        Loader oldLoader = this.loader;
         if (oldLoader == loader)
             return;
         this.loader = loader;

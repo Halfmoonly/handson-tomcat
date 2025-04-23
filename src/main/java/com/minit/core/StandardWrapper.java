@@ -1,9 +1,6 @@
 package com.minit.core;
 
-import com.minit.Container;
-import com.minit.Request;
-import com.minit.Response;
-import com.minit.Wrapper;
+import com.minit.*;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -45,7 +42,7 @@ public class StandardWrapper extends ContainerBase implements Wrapper {
             throw new ServletException("servlet class has not been specified");
         }
 
-        WebappClassLoader classLoader = getLoader();
+        Loader classLoader = getLoader();
 
         // Load the specified servlet class from the appropriate class loader
         Class classClass = null;

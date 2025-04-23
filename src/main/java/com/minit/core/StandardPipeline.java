@@ -1,9 +1,16 @@
 package com.minit.core;
 
-import com.minit.*;
+import java.io.IOException;
 
 import javax.servlet.ServletException;
-import java.io.IOException;
+
+import com.minit.Container;
+import com.minit.Logger;
+import com.minit.Pipeline;
+import com.minit.Request;
+import com.minit.Response;
+import com.minit.Valve;
+import com.minit.ValveContext;
 
 public class StandardPipeline implements Pipeline{
     public StandardPipeline() {
