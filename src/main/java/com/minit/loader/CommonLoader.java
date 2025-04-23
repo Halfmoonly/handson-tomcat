@@ -1,4 +1,4 @@
-package com.minit.core;
+package com.minit.loader;
 
 import com.minit.Container;
 import com.minit.Loader;

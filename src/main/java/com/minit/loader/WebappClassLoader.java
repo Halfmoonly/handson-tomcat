@@ -1,4 +1,4 @@
-package com.minit.core;
+package com.minit.loader;
 
 import java.net.URL;
 import java.net.URLClassLoader;

@@ -3,13 +3,19 @@ package com.minit.core;
 import com.minit.*;
 import com.minit.connector.http.HttpConnector;
 import com.minit.logger.FileLogger;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
 
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -29,32 +35,6 @@ public class StandardContext extends ContainerBase implements Context{
         super();
         pipeline.setBasic(new StandardContextValve());
         log("Container created.");
-    }
-
-    public void start(){
-        fireContainerEvent("Container Started",this);
-
-        Logger logger = new FileLogger();
-        setLogger(logger);
-
-        FilterDef filterDef = new FilterDef();
-        filterDef.setFilterName("TestFilter");
-        filterDef.setFilterClass("test.TestFilter");
-        addFilterDef(filterDef);
-
-        FilterMap filterMap = new FilterMap();
-        filterMap.setFilterName("TestFilter");
-        filterMap.setURLPattern("/*");
-        addFilterMap(filterMap);
-
-        filterStart();
-
-        ContainerListenerDef listenerDef = new ContainerListenerDef();
-        listenerDef.setListenerName("TestListener");
-        listenerDef.setListenerClass("test.TestListener");
-        addListenerDef(listenerDef);
-        listenerStart();
-
     }
 
     public void addContainerListener(ContainerListener listener) {
@@ -153,7 +133,7 @@ public class StandardContext extends ContainerBase implements Context{
     public Wrapper getWrapper(String name){
         StandardWrapper servletWrapper = servletInstanceMap.get(name);
         if ( servletWrapper == null) {
-            String servletClassName = name;
+            String servletClassName = servletClsMap.get(name);
             servletWrapper = new StandardWrapper(servletClassName,this);
             this.servletClsMap.put(name, servletClassName);
             this.servletInstanceMap.put(name, servletWrapper);
@@ -284,7 +264,7 @@ public class StandardContext extends ContainerBase implements Context{
     }
 
     public boolean listenerStart() {
-        System.out.println("Listener Start..........");
+        System.out.println("Context Listener Start..........");
         boolean ok = true;
         synchronized (listeners) {
             listeners.clear();
@@ -314,5 +294,99 @@ public class StandardContext extends ContainerBase implements Context{
         }
 
         return (ok);
+    }
+
+    public void start(){
+        fireContainerEvent("Container Started",this);
+
+        Logger logger = new FileLogger();
+        setLogger(logger);
+
+        //scan web.xml
+        String file = System.getProperty("minit.base") + File.separator +
+                this.docbase + File.separator + "WEB-INF" + File.separator + "web.xml";
+
+        SAXReader reader = new SAXReader();
+        Document document;
+        try {
+            document = reader.read(file);
+            Element root = document.getRootElement();
+
+            //listeners
+            List<Element> listeners = root.elements("listener");
+            for (Element listener : listeners) {
+                Element listenerclass = listener.element("listener-class");
+                String listenerclassname = listenerclass.getText();
+                System.out.println("listenerclassname: " + listenerclassname);
+
+                //load listeners
+                ContainerListenerDef listenerDef = new ContainerListenerDef();
+                listenerDef.setListenerName(listenerclassname);
+                listenerDef.setListenerClass(listenerclassname);
+                addListenerDef(listenerDef);
+            }
+            listenerStart();
+
+            //filters
+            List<Element> filters = root.elements("filter");
+            for (Element filter : filters) {
+                Element filetername = filter.element("filter-name");
+                String fileternamestr = filetername.getText();
+                Element fileterclass = filter.element("filter-class");
+                String fileterclassstr = fileterclass.getText();
+                System.out.println("filter " + fileternamestr + fileterclassstr);
+
+                //load filters
+                FilterDef filterDef = new FilterDef();
+                filterDef.setFilterName(fileternamestr);
+                filterDef.setFilterClass(fileterclassstr);
+                addFilterDef(filterDef);
+            }
+
+            //filter mappings
+            List<Element> filtermaps = root.elements("filter-mapping");
+            for (Element filtermap : filtermaps) {
+                Element filetername = filtermap.element("filter-name");
+                String fileternamestr = filetername.getText();
+                Element urlpattern = filtermap.element("url-pattern");
+                String urlpatternstr = urlpattern.getText();
+                System.out.println("filter mapping " + fileternamestr + urlpatternstr);
+
+                FilterMap filterMap = new FilterMap();
+                filterMap.setFilterName(fileternamestr);
+                filterMap.setURLPattern(urlpatternstr);
+                addFilterMap(filterMap);
+            }
+
+            filterStart();
+
+            //servlet
+            List<Element> servlets = root.elements("servlet");
+            for (Element servlet : servlets) {
+                Element servletname = servlet.element("servlet-name");
+                String servletnamestr = servletname.getText();
+                Element servletclass = servlet.element("servlet-class");
+                String servletclassstr = servletclass.getText();
+                Element loadonstartup = servlet.element("load-on-startup");
+                String loadonstartupstr = null;
+                if (loadonstartup != null) {
+                    loadonstartupstr = loadonstartup.getText();
+                }
+
+                System.out.println("servlet " + servletnamestr + servletclassstr);
+
+                this.servletClsMap.put(servletnamestr, servletclassstr);
+                if (loadonstartupstr != null) {
+                    getWrapper(servletnamestr);
+                }
+
+            }
+
+        } catch (DocumentException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        System.out.println("Context started.........");
     }
 }
