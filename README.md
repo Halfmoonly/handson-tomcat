@@ -45,10 +45,13 @@ Server: tomcat
 Hello World!
 ```
 handson-tomcat章节如下；
-- 服务层
-- 连接层
-- 容器层
-- 多应用
+- 一、服务层
+- 二、连接层
+- 三、容器层
+- 四、多应用
+- 五、集成Spring
+
+> 第五章中，Spring部分的源码同样是手写，见我另一个仓库：handson-spring
 
 与`handson-spring`一样，`handson-tomcat`依旧采取多分支开发的方式，分支结构如下：
 - a-server01：实现一个最简单的静态资源服务器，根据请求返回基本的响应结构
@@ -74,6 +77,7 @@ handson-tomcat章节如下；
 - d-mapp-01：通过引入更大的容器`StandardHost`，隔离`URLClassLoader`与`StandardContext`。隔离不同用户的应用路径加载，甚至是同名应用（不同路径代表不同版本：`jvm:classloader+classname`）隔离加载
 - d-mapp-02：自定义了类加载器用于打破`JVM`默认的双亲委派规则，分别是`CommonClassLoader`用于加载`lib`目录，以及`WebappClassLoader`用于加载用户`webapps`目录中的`Servlet`
 - d-mapp-03：引入 `server.xml` 和 `web.xml` 配置解析，分别管理 `Host` 启动配置与 `Servlet` 加载配置
+- e-integration-spring-01：集成模式为独立服务器Tomcat托管Spring，Spring只是作为webapps，暂未考虑spring嵌入Tomcat服务器模式embedded
 - 更多分支正在更新中...
 
 main分支包含以上所有功能特性，全量/增量开发文档见[docs](docs)目录
