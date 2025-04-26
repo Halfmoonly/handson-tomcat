@@ -203,6 +203,12 @@ public class HttpConnector implements Runnable {
 
 ## 调整HttpServer
 这个时候，我们就可以调整 HttpServer 里的代码，拆分功能了。
+
+connector和container互相指引，体现的是拥有和隶属于的关系：
+- connector拥有container
+- container隶属于connector
+
+这种设计我印象中在springmvc的父子容器中也有体现，父子组件之间互相持有对方的引用，互为组合关系是这种设计的精髓
 ```java
 package server;
 public class HttpServer {
