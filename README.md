@@ -71,10 +71,13 @@ handson-tomcat章节如下；
 - b-connector10：本节我们简单探讨了一下 `Keep-alive` 和 `chunked` 模式，让同一个 `Socket` 可以用于多次访问，减少了 `Socket` 的连接和关闭。
 - c-container-01：本节初步引入了容器的实现，`ServletContainer`，同时为了后续增强对Servlet生命周期的管理用ServletWrapper代替了Servlet
 - c-container-02：参考`Tomcat`项目结构，形成了两层容器，`ServletContext`(原ServletContainer)和`ServletWrapper`，`Tomcat` 把 `Wrapper` 也看作一种容器，也就是隶属于 Context 之下的子容器（Child Container）
-- c-container-03：
-  - 简单引入日志模块
-  - 引入逆序职责链模式`Pipeline+Valve`，`Valve`设计用于`Tomcat`容器级处理流程，强调基础阀`BasicValve`的重要性用于容器间调用，因此设计为逆序职责链
-- c-container-04：引入顺序职责链模式`Filter`，`Filter`设计主要用于`Tomcat`容器内最后面的Web应用层面请求和响应处理，因此设计为顺序职责链
+- c-container-03：引入逆序职责链模式`Pipeline+Valve`，`Valve`设计用于`Tomcat`容器间处理流程主机->引擎->应用程序，没有`url`模式，所以拦截所有应用程序/请求，不属于`Servlet`规范。注意同层容器内可以配置多个`Valve`并且是逆序触发的，因此每层容器中的基础阀`setBasic`用于触发下层容器执行
+  - 每层容器都通过抽象父类`ContainerBase`组合了`StandardPipeline pipeline`，`StandardPipeline`代表当前层容器的阀门集合，组合了`Valve valves[]`
+  - 父容器`StandardHost`指定基础阀为`StandardHostValve`，通过持有的`pipeline`触发子容器`StandardContext`
+  - 父容器`StandardContext`指定基础阀为`StandardContextValve`，通过持有的`pipeline`触发最后的容器`StandardWrapper`
+  - 父容器`StandardWrapper`指定基础阀为`StandardWrapperValve`，通过持有的`pipeline`构造和触发后续的过滤器`Filter`
+  - 过滤器`Filter`见下面的分支`c-container-04`，过滤器之后最终就会抵达用户`Servlet`应用
+- c-container-04：引入顺序职责链模式`Filter`，`Filter`设计主要用于`Tomcat`最后应用层面请求和响应处理，支持`url-parttern`仅拦截对给定应用程序的请求，属于`Servlet`规范
 - c-container-05：引入监听器`Listener`，首先定义了事件接口和监听接口，然后在容器`Container`启动过程中通过反射提前收集到所有用户配置的监听器实现，最后框架会在合适的位置执行用户的监听逻辑
 - d-mapp-01：通过引入更大的容器`StandardHost`，隔离`URLClassLoader`与`StandardContext`。隔离不同用户的应用路径加载，甚至是同名应用（不同路径代表不同版本：`jvm:classloader+classname`）隔离加载
 - d-mapp-02：自定义了类加载器用于打破`JVM`默认的双亲委派规则，分别是`CommonClassLoader`用于加载`lib`目录，以及`WebappClassLoader`用于加载用户`webapps`目录中的`Servlet`
